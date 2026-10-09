@@ -32,9 +32,8 @@ class PredictionServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        // Configure the mock RestTemplate with a more specific matcher for the target URL
         when(restTemplate.postForObject(
-            eq("http://localhost:8000/detailed_stats"), 
+            eq("http://127.0.0.1:8003/detailed_stats"),
             any(), 
             eq(Object.class))
         ).thenReturn("MOCKED_RESPONSE");
@@ -42,16 +41,16 @@ class PredictionServiceTest {
 
     @Test
     void testSuccess() throws UserException {
-        when(userService.getClientLocation(request)).thenReturn(Map.of("lat", 1.0, "lon", 2.0));
+        when(userService.getClientLocation(request)).thenReturn(Map.of("latitude", 1.0, "longitude", 2.0));
         Map<String, Object> monthMap = Map.of("a", 1);
         Map<String, Object> yearMap = Map.of("06", monthMap);
         Map<String, Object> prekor = Map.of("2024", yearMap);
         when(userService.getUserDataForML("u", request)).thenReturn(Map.of("prekoracitve", prekor));
-        // Optionally, you can override the mock specifically for this test
-        when(restTemplate.postForObject(anyString(), any(), eq(Object.class))).thenReturn("OK");
-
         Object result = predictionService.getMonthlyOverrunPrediction("u", "2025", "06", request);
-        assertEquals("OK", result);
+        assertEquals("MOCKED_RESPONSE", result);
+        verify(restTemplate).postForObject(eq("http://127.0.0.1:8003/detailed_stats"),
+                argThat(body -> body instanceof Map<?, ?> payload && Double.valueOf(1.0).equals(payload.get("lat"))
+                        && Double.valueOf(2.0).equals(payload.get("lon"))), eq(Object.class));
     }
 
     @Test

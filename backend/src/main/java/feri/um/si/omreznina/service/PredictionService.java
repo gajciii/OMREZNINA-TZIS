@@ -3,6 +3,7 @@ package feri.um.si.omreznina.service;
 import feri.um.si.omreznina.exceptions.UserException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -18,6 +19,9 @@ public class PredictionService {
 
     @Autowired
     private RestTemplate restTemplate;
+
+    @Value("${helpers.prediction.base-url:http://127.0.0.1:8003}")
+    private String predictionBaseUrl = "http://127.0.0.1:8003";
 
     public Object getMonthlyOverrunPrediction(String uid, String predictionYear, String predictionMonth,
             HttpServletRequest request) throws UserException {
@@ -54,7 +58,7 @@ public class PredictionService {
         pythonReq.put("month", predictionMonth);
         pythonReq.put("data", monthMap);
 
-        String pythonUrl = "https://predikcija-prekoracitev.onrender.com/detailed_stats";
+        String pythonUrl = predictionBaseUrl + "/detailed_stats";
         return restTemplate.postForObject(pythonUrl, pythonReq, Object.class);
     }
 }

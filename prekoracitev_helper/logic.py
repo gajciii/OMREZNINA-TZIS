@@ -1,5 +1,8 @@
 import pandas as pd
-from time_block import TimeBlockBuilder
+if __package__:
+    from .time_block import TimeBlockBuilder
+else:
+    from time_block import TimeBlockBuilder
 
 def process_file(file, agreed_power_map):
     agreed_power_map = {str(k): v for k, v in agreed_power_map.items()}
@@ -37,7 +40,7 @@ def process_file(file, agreed_power_map):
             entries = []
 
             max_power_row = block_group.loc[block_group["P+ Prejeta delovna moč"].idxmax()]
-            max_power = round(max_power_row["P+ Prejeta delovna moč"], 2)
+            max_power = round(float(max_power_row["P+ Prejeta delovna moč"]), 2)
             agreed_power_price = round(agreed_power * block_price, 2)
 
             if max_power <= agreed_power:
@@ -49,7 +52,7 @@ def process_file(file, agreed_power_map):
                 total_price = agreed_power_price + penalty_price
 
             entries.append({
-                "block": block_num,
+                "block": int(block_num),
                 "blockPrice": block_price,
                 "agreedPower": agreed_power,
                 "timestamp": max_power_row["timestamp"].strftime("%d-%m %H:%M"),

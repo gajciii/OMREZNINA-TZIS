@@ -3,9 +3,11 @@ import { useState } from "react";
 import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
+  signInWithEmailAndPassword,
   updateProfile,
 } from "firebase/auth";
-import { auth } from "src/firebase-config";
+import { auth, useFirebaseEmulators } from "src/firebase-config";
+import { emailActionSettings, getLocalEmailActionLink } from "src/utils/emailActions";
 import { Icon } from "@iconify/react";
 
 const AuthRegister = () => {
@@ -18,6 +20,8 @@ const AuthRegister = () => {
   const [info, setInfo] = useState("");
   const [showResend, setShowResend] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [verificationLink, setVerificationLink] = useState<string | null>(null);
+  const [registeredCredentials, setRegisteredCredentials] = useState<{ email: string; password: string } | null>(null);
 
   const validatePassword = (pwd: string): string | null => {
     if (pwd.length < 6) return "Geslo mora imeti vsaj 6 znakov.";
@@ -34,6 +38,7 @@ const AuthRegister = () => {
     setError("");
     setInfo("");
     setShowResend(false);
+    setVerificationLink(null);
 
     if (!name.trim()) {
       setError("Vnesite svoje ime.");
@@ -73,12 +78,15 @@ const AuthRegister = () => {
       await updateProfile(user, { displayName: name });
       auth.languageCode = 'sl';
 
-      await sendEmailVerification(user, {
-        url: "https://omreznina.netlify.app/auth/verify-info",
-        handleCodeInApp: false,
-      });
-
-      setInfo("Registracija uspešna! Potrditveni email je bil poslan.");
+      await sendEmailVerification(user, emailActionSettings('/auth/verify-info'));
+      const localLink = await getLocalEmailActionLink(email, 'VERIFY_EMAIL');
+      setVerificationLink(localLink);
+      setRegisteredCredentials({ email, password });
+      setInfo(useFirebaseEmulators
+        ? localLink
+          ? "Registracija uspešna! Email potrdite s spodnjo lokalno povezavo."
+          : "Registracija uspešna! Potrditvena povezava je v izpisu lokalnega emulatorja."
+        : "Registracija uspešna! Potrditveni email je bil poslan.");
       setShowResend(true);
 
       await auth.signOut();
@@ -94,22 +102,34 @@ const AuthRegister = () => {
   };
 
   const handleResendVerification = async () => {
+    if (!registeredCredentials || isSubmitting) return;
+    setIsSubmitting(true);
+    setError("");
     try {
-      const user = auth.currentUser;
+      const { email: registeredEmail, password: registeredPassword } = registeredCredentials;
+      const { user } = await signInWithEmailAndPassword(auth, registeredEmail, registeredPassword);
 
-      if (user && !user.emailVerified) {
+      if (!user.emailVerified) {
         auth.languageCode = 'sl';
 
-        await sendEmailVerification(user, {
-          url: "https://omreznina.netlify.app/auth/verify-info",
-          handleCodeInApp: false,
-        });
-        setInfo("Potrditveni email je bil ponovno poslan.");
+        await sendEmailVerification(user, emailActionSettings('/auth/verify-info'));
+        const localLink = await getLocalEmailActionLink(registeredEmail, 'VERIFY_EMAIL');
+        setVerificationLink(localLink);
+        setInfo(useFirebaseEmulators
+          ? localLink
+            ? "Nova potrditvena povezava je pripravljena spodaj."
+            : "Nova potrditvena povezava je v izpisu lokalnega emulatorja."
+          : "Potrditveni email je bil ponovno poslan.");
       } else {
-        setError("Uporabnik ni prijavljen ali je že verificiran.");
+        setInfo("Email je že potrjen. Sedaj se lahko prijavite.");
+        setShowResend(false);
+        setVerificationLink(null);
       }
     } catch (err) {
       setError("Napaka pri ponovnem pošiljanju emaila.");
+    } finally {
+      await auth.signOut();
+      setIsSubmitting(false);
     }
   };
 
@@ -167,6 +187,11 @@ const AuthRegister = () => {
 
       {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
       {info && <p className="text-green-600 text-sm mb-4">{info}</p>}
+      {verificationLink && (
+        <a href={verificationLink} className="block text-primary underline text-sm mb-4">
+          Potrdi lokalni email naslov
+        </a>
+      )}
 
       {showResend && (
         <div className="mb-4">
@@ -175,6 +200,8 @@ const AuthRegister = () => {
           </p>
           <Button
             onClick={handleResendVerification}
+            type="button"
+            disabled={isSubmitting}
             size="xs"
             className="mt-2"
           >

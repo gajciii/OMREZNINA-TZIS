@@ -16,7 +16,7 @@ describe('Avtentikacija – Prijava in Registracija', () => {
     cy.get('input#email').type('test@example.com');
     cy.get('input#password').type('napačnoGeslo123');
     cy.get('button').contains('Prijava').click();
-    cy.contains('Napaka pri prijavi').should('be.visible');
+    cy.contains(/Napaka pri prijavi|Uporabnik s tem emailom ne obstaja|Geslo ni pravilno/).should('be.visible');
   });
 
   it('Napaka ob praznih poljih', () => {

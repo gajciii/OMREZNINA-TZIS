@@ -425,13 +425,16 @@ public class FirestoreServiceTest {
 	}
 
 	@Test
-	void testRemoveDocument_deletesCorrectly() {
+	void testRemoveDocument_deletesCorrectly() throws Exception {
 		Firestore mockDb = mock(Firestore.class);
 		CollectionReference mockCollection = mock(CollectionReference.class);
 		DocumentReference mockDocRef = mock(DocumentReference.class);
+		ApiFuture<WriteResult> deleteFuture = mock(ApiFuture.class);
 
 		when(mockDb.collection("user123")).thenReturn(mockCollection);
 		when(mockCollection.document("to-delete")).thenReturn(mockDocRef);
+		when(mockDocRef.delete()).thenReturn(deleteFuture);
+		when(deleteFuture.get()).thenReturn(mock(WriteResult.class));
 
 		FirestoreService service = new FirestoreService(mockDb);
 
@@ -529,8 +532,11 @@ public class FirestoreServiceTest {
 		QueryDocumentSnapshot mockSubDoc2 = mock(QueryDocumentSnapshot.class);
 		DocumentReference mockSubDocRef1 = mock(DocumentReference.class);
 		DocumentReference mockSubDocRef2 = mock(DocumentReference.class);
-		ApiFuture<QuerySnapshot> mockFuture = mock(ApiFuture.class);
-		QuerySnapshot mockQuerySnapshot = mock(QuerySnapshot.class);
+			ApiFuture<QuerySnapshot> mockFuture = mock(ApiFuture.class);
+			ApiFuture<WriteResult> deleteFuture1 = mock(ApiFuture.class);
+			ApiFuture<WriteResult> deleteFuture2 = mock(ApiFuture.class);
+			ApiFuture<WriteResult> parentDeleteFuture = mock(ApiFuture.class);
+			QuerySnapshot mockQuerySnapshot = mock(QuerySnapshot.class);
 
 		when(db.collection(uid)).thenReturn(mockUserCol);
 		when(mockUserCol.document(docId)).thenReturn(mockDocRef);
@@ -541,8 +547,14 @@ public class FirestoreServiceTest {
 		List<QueryDocumentSnapshot> docs = List.of(mockSubDoc1, mockSubDoc2);
 		when(mockQuerySnapshot.getDocuments()).thenReturn(docs);
 
-		when(mockSubDoc1.getReference()).thenReturn(mockSubDocRef1);
-		when(mockSubDoc2.getReference()).thenReturn(mockSubDocRef2);
+			when(mockSubDoc1.getReference()).thenReturn(mockSubDocRef1);
+			when(mockSubDoc2.getReference()).thenReturn(mockSubDocRef2);
+			when(mockSubDocRef1.delete()).thenReturn(deleteFuture1);
+			when(mockSubDocRef2.delete()).thenReturn(deleteFuture2);
+			when(mockDocRef.delete()).thenReturn(parentDeleteFuture);
+			when(deleteFuture1.get()).thenReturn(mock(WriteResult.class));
+			when(deleteFuture2.get()).thenReturn(mock(WriteResult.class));
+			when(parentDeleteFuture.get()).thenReturn(mock(WriteResult.class));
 
 		firestoreService.removeDocumentAndSubcollections(uid, docId);
 

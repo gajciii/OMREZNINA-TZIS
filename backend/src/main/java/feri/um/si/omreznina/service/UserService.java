@@ -1,6 +1,7 @@
 package feri.um.si.omreznina.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,6 +32,15 @@ public class UserService {
 	private FileService fileService;
 
 	FirestoreService firestoreService;
+
+	@Value("${location.latitude:46.0569}")
+	private double defaultLatitude = 46.0569;
+
+	@Value("${location.longitude:14.5058}")
+	private double defaultLongitude = 14.5058;
+
+	@Value("${location.ip-lookup-enabled:false}")
+	private boolean ipLookupEnabled;
 
 	public UserService(FileService fileService, FirestoreService firestoreService) {
 		this.fileService = fileService;
@@ -70,14 +80,16 @@ public class UserService {
 	}
 
 	public Map<String, Double> getClientLocation(HttpServletRequest request) {
+		if (!ipLookupEnabled) {
+			return defaultLocation();
+		}
 		try {
 			String ipAddress = getIpAddress(request);
 
-			if (ipAddress == null || ipAddress.equals("0:0:0:0:0:0:0:1") || ipAddress.equals("127.0.0.1") || !ipAddress.matches("^([0-9]{1,3}\\.){3}[0-9]{1,3}$")) {
-				Map<String, Double> location = new HashMap<>();
-				location.put("latitude", 46.0569);
-				location.put("longitude", 14.5058);
-				return location;
+			if (ipAddress == null || ipAddress.startsWith("127.") || ipAddress.startsWith("10.")
+					|| ipAddress.startsWith("192.168.") || ipAddress.matches("^172\\.(1[6-9]|2[0-9]|3[01])\\..*")
+					|| !ipAddress.matches("^([0-9]{1,3}\\.){3}[0-9]{1,3}$")) {
+				return defaultLocation();
 			}
 
 			logger.info("ip v getClient " + ipAddress);
@@ -99,10 +111,11 @@ public class UserService {
 		} catch (Exception e) {
 			logger.warning("IP location fetch failed: " + e.getMessage());
 		}
-		Map<String, Double> location = new HashMap<>();
-		location.put("latitude", 46.0569);
-		location.put("longitude", 14.5058);
-		return location;
+		return defaultLocation();
+	}
+
+	private Map<String, Double> defaultLocation() {
+		return Map.of("latitude", defaultLatitude, "longitude", defaultLongitude);
 	}
 
 	public Map<String, Object> getUserDataForML(@RequestParam("uid") String uid, HttpServletRequest request)
@@ -150,7 +163,7 @@ public class UserService {
 		}
 		ipAddress = request.getHeader("X-Forwarded-For");
 		if (ipAddress != null && !ipAddress.isEmpty()) {
-			return ipAddress;
+			return ipAddress.split(",", 2)[0].trim();
 		}
 		ipAddress = request.getRemoteAddr();
 		if (ipAddress != null && !ipAddress.isEmpty()) {

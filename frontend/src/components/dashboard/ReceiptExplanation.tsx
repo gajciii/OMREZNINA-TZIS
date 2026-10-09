@@ -6,7 +6,7 @@ import {
   getAvailableYears,
   ManualInvoice,
 } from "src/index";
-import { auth } from "src/firebase-config";
+import { useAuth } from "src/contexts/AuthContext";
 
 const explanationTexts: Record<string, string> = {
   "Skupni znesek brez DDV": "Vsota vseh postavk na računu pred obračunom DDV, vključno s stroškom energije, omrežnino, prispevki in morebitnimi penali. Predstavlja osnovo za izračun davka in skupnega zneska za plačilo.", 
@@ -21,6 +21,8 @@ const explanationTexts: Record<string, string> = {
 
 
 const InvoiceTable: React.FC = () => {
+  const { user } = useAuth();
+  const uid = user?.uid;
   const [invoice, setInvoice] = useState<ManualInvoice | null>(null);
   const [years, setYears] = useState<string[]>([]);
   const [months, setMonths] = useState<string[]>([]);
@@ -29,33 +31,15 @@ const InvoiceTable: React.FC = () => {
   const [openRows, setOpenRows] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
 
-  const keyId = auth.config.apiKey;
-  const userSessionid = "firebase:authUser:" + keyId + ":[DEFAULT]";
-
-  const getUid = (): string => {
-    const sessionUser = sessionStorage.getItem(userSessionid);
-    if (sessionUser) {
-      try {
-        const user = JSON.parse(sessionUser);
-        if ("uid" in user) {
-          return user.uid;
-        }
-      } catch {}
-    }
-    return "";
-  };
-
   useEffect(() => {
-    const uid = getUid();
     if (!uid) return;
 
     getAvailableYears(uid)
       .then(setYears)
       .catch(console.error);
-  }, []);
+  }, [uid]);
 
   useEffect(() => {
-    const uid = getUid();
     if (!uid || !selectedYear) return;
 
     setInvoice(null);
@@ -63,10 +47,9 @@ const InvoiceTable: React.FC = () => {
     getAvailableMonths(uid, selectedYear)
       .then(setMonths)
       .catch(console.error);
-  }, [selectedYear]);
+  }, [uid, selectedYear]);
 
   useEffect(() => {
-    const uid = getUid();
     if (!uid || !selectedYear || !selectedMonth) return;
 
     setLoading(true);
@@ -77,7 +60,7 @@ const InvoiceTable: React.FC = () => {
         setInvoice(null);
       })
       .finally(() => setLoading(false));
-  }, [selectedMonth]);
+  }, [uid, selectedYear, selectedMonth]);
 
   const fmt = (value: string | number | undefined, label: string) => {
     if (label === "Opomba") return value || "–";

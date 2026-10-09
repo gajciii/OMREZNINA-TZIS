@@ -38,7 +38,7 @@ public class FileServiceTest {
         String response = fileService.sendFileToParser(multipartFile);
 
         assertEquals(mockResponse, response);
-        verify(mockRestTemplate, times(1)).postForObject(anyString(), any(HttpEntity.class), eq(String.class));
+        verify(mockRestTemplate, times(1)).postForObject(eq("http://127.0.0.1:8001/upload-file"), any(HttpEntity.class), eq(String.class));
     }
 
     @Test
@@ -64,9 +64,21 @@ public class FileServiceTest {
         assertEquals(expectedResponse, result);
 
         verify(mockRestTemplate, times(1)).postForObject(
-                eq("https://prekoracitev-helper.onrender.com/optimal"),
+                eq("http://127.0.0.1:8002/optimal"),
                 any(),
                 eq(String.class));
+    }
+
+    @Test
+    void uploadMaxPowerUsesLocalPowerHelper() throws Exception {
+        RestTemplate restTemplate = mock(RestTemplate.class);
+        FileService fileService = new FileService(restTemplate);
+        MockMultipartFile file = new MockMultipartFile("file", "data.csv", "text/csv", "data".getBytes());
+
+        fileService.uploadMaxPowerConsumed(file, "{}");
+
+        verify(restTemplate).postForObject(eq("http://127.0.0.1:8002/upload-file-dogovorjena-moc"),
+                any(HttpEntity.class), eq(String.class));
     }
 
 }

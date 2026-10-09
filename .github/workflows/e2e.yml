@@ -10,10 +10,6 @@ on:
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -21,21 +17,51 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 22
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps --force
+        run: bash scripts/setup-local.sh
 
       - name: Build project
-        run: npm run build
+        run: npm --prefix frontend run build
 
-      - name: Start Vite preview server
-        run: npm run preview &
+      - name: Start local application
+        run: node scripts/start-local.mjs > .local/logs/launcher.log 2>&1 &
         env:
-          NODE_ENV: test
+          WEATHER_ENABLED: 'false'
 
-      - name: Wait for Vite server
-        run: npx wait-on http://localhost:4173
+      - name: Wait for local application
+        run: |
+          for attempt in $(seq 1 120); do
+            if curl --fail --silent http://127.0.0.1:5173/api/health; then exit 0; fi
+            sleep 1
+          done
+          cat .local/logs/*.log
+          exit 1
+
+      - name: Check local services and storage
+        run: npm run smoke
 
       - name: Run Cypress tests manually
+        working-directory: frontend
         run: npx cypress run
+        env:
+          CYPRESS_BASE_URL: http://127.0.0.1:5173
+
+      - name: Save logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: local-service-logs
+          path: .local/logs/

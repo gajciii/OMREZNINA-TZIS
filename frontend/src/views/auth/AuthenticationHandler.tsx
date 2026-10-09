@@ -15,13 +15,16 @@ const AuthenticationHandler = () => {
   useEffect(() => {
     if (mode === "verifyEmail" && oobCode) {
       applyActionCode(auth, oobCode)
-        .then(() => {
+        .then(async () => {
+          await auth.signOut();
           localStorage.setItem("emailVerified", "true");
-          navigate("/auth/login");
+          navigate("/auth/login", { replace: true });
         })
         .catch(() => {
           setStatus("Napaka: povezava ni veljavna ali je potekla.");
         });
+    } else if (mode === "verifyEmail") {
+      setStatus("Napaka: povezava ni veljavna ali je potekla.");
     }
   }, [mode, oobCode, navigate]);
 

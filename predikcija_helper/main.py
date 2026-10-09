@@ -3,8 +3,37 @@ import pandas as pd
 from collections import Counter
 import requests
 import datetime
+import logging
+import os
 
 app = FastAPI()
+logger = logging.getLogger(__name__)
+WEATHER_ENABLED = os.getenv("WEATHER_ENABLED", "true").lower() not in {"0", "false", "no"}
+
+
+@app.get("/")
+async def root():
+    return {"status": "ok"}
+
+
+def fetch_weather_daily(url, params):
+    if not WEATHER_ENABLED:
+        return None
+    try:
+        response = requests.get(url, params=params, timeout=(3, 5))
+        response.raise_for_status()
+        daily = response.json()["daily"]
+        keys = ("time", "temperature_2m_max", "temperature_2m_min", "temperature_2m_mean")
+        if not all(isinstance(daily.get(key), list) for key in keys):
+            return None
+        if len({len(daily[key]) for key in keys}) != 1:
+            return None
+        return daily
+    except (requests.RequestException, ValueError, KeyError, TypeError, AttributeError) as exc:
+        # Weather enriches the statistics; local analysis remains available
+        # when the computer is offline or Open-Meteo is unavailable.
+        logger.warning("Weather data unavailable: %s", exc)
+        return None
 
 def get_weather_month(lat, lon, year, month):
     start_date = f"{year}-{int(month):02d}-01"
@@ -21,14 +50,13 @@ def get_weather_month(lat, lon, year, month):
         "daily": "temperature_2m_max,temperature_2m_min,temperature_2m_mean",
         "timezone": "Europe/Ljubljana"
     }
-    r = requests.get(url, params=params)
-    if r.status_code == 200:
-        data = r.json()
+    daily = fetch_weather_daily(url, params)
+    if daily is not None:
         return pd.DataFrame({
-            "date": data["daily"]["time"],
-            "temp_max": data["daily"]["temperature_2m_max"],
-            "temp_min": data["daily"]["temperature_2m_min"],
-            "temp_mean": data["daily"]["temperature_2m_mean"]
+            "date": daily["time"],
+            "temp_max": daily["temperature_2m_max"],
+            "temp_min": daily["temperature_2m_min"],
+            "temp_mean": daily["temperature_2m_mean"]
         })
     return None
 
@@ -50,14 +78,12 @@ def get_weather_forecast(lat, lon, year, month):
             "daily": "temperature_2m_max,temperature_2m_min,temperature_2m_mean",
             "timezone": "Europe/Ljubljana"
         }
-        r = requests.get(url, params=params)
-        if r.status_code == 200:
-            data = r.json()
-            if "daily" in data and "temperature_2m_mean" in data["daily"]:
-                temps = data["daily"]["temperature_2m_mean"]
-                if len(temps) > 0:
-                    mean_temp = sum(temps) / len(temps)
-                    return round(mean_temp, 1)
+        daily = fetch_weather_daily(url, params)
+        if daily is not None:
+            temps = [temp for temp in daily["temperature_2m_mean"] if temp is not None]
+            if temps:
+                mean_temp = sum(temps) / len(temps)
+                return round(mean_temp, 1)
     return None
 
 def parse_data(data):
@@ -148,7 +174,7 @@ async def detailed_stats(request: Request):
             "avg_peak": round(avg_peak, 2),
             "max_peak": round(max_peak, 2),
             "frac_over_85": round(frac_over_85, 2),
-            "avg_temp": round(avg_temp, 1) if avg_temp is not None else None,
+            "avg_temp": round(avg_temp, 1) if avg_temp is not None and pd.notna(avg_temp) else None,
             "forecasted_avg_temp": forecasted_avg_temp,
             "most_common_overrun_day": day_map[most_common_day] if most_common_day is not None else None,
             "most_common_overrun_hour": int(most_common_hour) if most_common_hour is not None else None,
@@ -160,3 +186,8 @@ async def detailed_stats(request: Request):
         "overruns_by_hour": dict(hour_counter),
         "overruns_by_day_in_month": dict(dom_counter)
     }
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host=os.getenv("HOST", "127.0.0.1"), port=int(os.getenv("PORT", "8003")))

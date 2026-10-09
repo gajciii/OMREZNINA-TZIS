@@ -9,7 +9,8 @@ import {
   sendEmailVerification,
 } from "firebase/auth";
 import { useNavigate } from "react-router";
-import { auth } from "src/firebase-config";
+import { auth, useFirebaseEmulators } from "src/firebase-config";
+import { emailActionSettings, getLocalEmailActionLink } from "src/utils/emailActions";
 import { Icon } from "@iconify/react";
 import VerifyMfa from "src/views/mfa/VerifyMfa";
 import { getMfaSettings } from "src/index";
@@ -29,12 +30,15 @@ const AuthLogin = () => {
   const [resetEmail, setResetEmail] = useState("");
   const [resetStatus, setResetStatus] = useState("");
   const [showResendVerify, setShowResendVerify] = useState(false);
+  const [resetLink, setResetLink] = useState<string | null>(null);
+  const [verificationLink, setVerificationLink] = useState<string | null>(null);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
     setInfo("");
     setShowResendVerify(false);
+    setVerificationLink(null);
 
     if (!email.trim()) {
       setError("Vnesite svoj email naslov.");
@@ -88,14 +92,21 @@ const AuthLogin = () => {
   };
 
   const handlePasswordReset = async () => {
+    setResetLink(null);
     if (!resetEmail.trim()) {
       setResetStatus("Vnesite email naslov za ponastavitev.");
       return;
     }
 
     try {
-      await sendPasswordResetEmail(auth, resetEmail);
-      setResetStatus("Povezava za ponastavitev gesla je bila poslana.");
+      await sendPasswordResetEmail(auth, resetEmail, emailActionSettings('/auth/login'));
+      const localLink = await getLocalEmailActionLink(resetEmail, 'PASSWORD_RESET');
+      setResetLink(localLink);
+      setResetStatus(useFirebaseEmulators
+        ? localLink
+          ? "Povezava za ponastavitev gesla je pripravljena spodaj."
+          : "Povezava za ponastavitev gesla je pripravljena v izpisu lokalnega emulatorja."
+        : "Povezava za ponastavitev gesla je bila poslana.");
     } catch (error: any) {
       if (error.code === "auth/user-not-found") {
         setResetStatus("Uporabnik s tem emailom ne obstaja.");
@@ -109,8 +120,14 @@ const AuthLogin = () => {
     try {
       const currentUser = auth.currentUser;
       if (currentUser) {
-        await sendEmailVerification(currentUser);
-        setInfo("Verifikacijski email je bil ponovno poslan.");
+        await sendEmailVerification(currentUser, emailActionSettings('/auth/verify-info'));
+        const localLink = await getLocalEmailActionLink(currentUser.email || email, 'VERIFY_EMAIL');
+        setVerificationLink(localLink);
+        setInfo(useFirebaseEmulators
+          ? localLink
+            ? "Email potrdite s spodnjo lokalno povezavo."
+            : "Potrditvena povezava je v izpisu lokalnega emulatorja."
+          : "Verifikacijski email je bil ponovno poslan.");
         setShowResendVerify(false);
       } else {
         setError("Ni prijavljenega uporabnika za pošiljanje potrditve.");
@@ -134,6 +151,7 @@ const AuthLogin = () => {
           setOpenModal(false);
           setResetEmail("");
           setResetStatus("");
+          setResetLink(null);
         }}
       >
         <Modal.Header>Pozabljeno geslo</Modal.Header>
@@ -148,9 +166,14 @@ const AuthLogin = () => {
               placeholder="email@primer.com"
             />
             {resetStatus && (
-              <p className={`text-sm ${resetStatus.includes("poslana") ? "text-green-600" : "text-red-600"}`}>
+              <p className={`text-sm ${resetStatus.includes("poslana") || resetStatus.includes("pripravljena") ? "text-green-600" : "text-red-600"}`}>
                 {resetStatus}
               </p>
+            )}
+            {resetLink && (
+              <a href={resetLink} className="block text-primary underline text-sm">
+                Ponastavi lokalno geslo
+              </a>
             )}
           </div>
         </Modal.Body>
@@ -210,11 +233,16 @@ const AuthLogin = () => {
 
         {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
         {info && <p className="text-green-600 text-sm mb-4">{info}</p>}
+        {verificationLink && (
+          <a href={verificationLink} className="block text-primary underline text-sm mb-4">
+            Potrdi lokalni email naslov
+          </a>
+        )}
 
         {showResendVerify && (
           <div className="mb-4">
             <p className="text-sm text-gray-700">Niste prejeli potrditvenega emaila?</p>
-            <Button onClick={handleResendVerification} size="xs" className="mt-2">
+            <Button type="button" onClick={handleResendVerification} size="xs" className="mt-2">
               Pošlji ponovno potrditveni email
             </Button>
           </div>

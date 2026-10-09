@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,16 +28,23 @@ public class ChatController {
     @Autowired
     private RestTemplate restTemplate;
 
-    @Value("${spring.ai.openai.chat.options.model}")
+    @Value("${spring.ai.openai.api-key:}")
+    private String apiKey;
+
+    @Value("${spring.ai.openai.chat.options.model:gpt-4o-mini}")
     private String model;
 
-    @Value("${spring.ai.openai.chat.options.temperature}")
+    @Value("${spring.ai.openai.chat.options.temperature:0}")
     private double temperature;
 
     private String apiUrl = "https://api.openai.com/v1/chat/completions";
 
     @PostMapping("/")
     public ResponseEntity<Map<String, Object>> chat(@RequestParam("prompt") String prompt) {
+        if (apiKey == null || apiKey.isBlank()) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(Map.of("message", "Za klepet nastavi OPENAI_API_KEY v lokalni datoteki .env."));
+        }
         ChatResponse chatResponse = null;
         List<Message> chatMessages = new ArrayList<>();
         ChatRequest request = null;

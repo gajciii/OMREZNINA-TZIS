@@ -6,7 +6,7 @@ target/
 
 ### APP KEY ###
 src/main/resources/serviceAccountKey.json
-src/main/resources/application.properties
+src/main/resources/application-local.properties
 
 ### STS ###
 .apt_generated

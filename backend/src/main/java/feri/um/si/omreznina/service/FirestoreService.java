@@ -322,8 +322,10 @@ public class FirestoreService {
 	public void removeDocument(String uid, String docId) {
 		try {
 			db.collection(uid).document(docId)
-					.delete();
-		} catch (Exception e) {
+					.delete().get();
+		} catch (InterruptedException | ExecutionException e) {
+			if (e instanceof InterruptedException)
+				Thread.currentThread().interrupt();
 			logger.warning("Could not delete: document");
 		}
 	}
@@ -332,8 +334,10 @@ public class FirestoreService {
 		try {
 			db.collection(uid).document(docId)
 					.collection(subCol).document(subDocId)
-					.delete();
-		} catch (Exception e) {
+					.delete().get();
+		} catch (InterruptedException | ExecutionException e) {
+			if (e instanceof InterruptedException)
+				Thread.currentThread().interrupt();
 			logger.warning("Could not delete: document");
 		}
 	}
@@ -347,11 +351,11 @@ public class FirestoreService {
 				List<QueryDocumentSnapshot> docs = future.get().getDocuments();
 
 				for (QueryDocumentSnapshot subDoc : docs) {
-					subDoc.getReference().delete();
+					subDoc.getReference().delete().get();
 				}
 			}
 
-			docRef.delete();
+			docRef.delete().get();
 
 		} catch (InterruptedException | ExecutionException e) {
 			if (e instanceof InterruptedException)

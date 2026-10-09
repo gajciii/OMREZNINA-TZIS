@@ -6,10 +6,11 @@ import Lottie from 'lottie-react';
 import plugLoading from '../../assets/lottie/Animation - 1748963030379.json';
 
 import { uploadMonthlyPower, uploadMonthlyOptimal, getAgreedPowers } from 'src/index';
-import { auth } from 'src/firebase-config';
+import { useAuth } from 'src/contexts/AuthContext';
 import { useUploadLoading } from '../../contexts/UploadLoadingContext';
 
 export default function Upload15min() {
+  const { user } = useAuth();
   const {
     isLoading, setIsLoading, progress, setProgress, message: resultMsg,
     setMessage, startPolling
@@ -37,19 +38,6 @@ export default function Upload15min() {
     }
     return () => { if (interval) clearInterval(interval); };
   }, [isLoading, messages.length]);
-
-  const keyId = auth.config.apiKey;
-  const userSessionid = 'firebase:authUser:' + keyId + ':[DEFAULT]';
-  const getUid = async () => {
-    const sessionUser = sessionStorage.getItem(userSessionid);
-    if (sessionUser) {
-      try {
-        const user = JSON.parse(sessionUser);
-        if ('uid' in user) return user.uid as string;
-      } catch {}
-    }
-    return null;
-  };
 
   useEffect(() => {
     setError(null);
@@ -79,7 +67,7 @@ export default function Upload15min() {
     setProgress(10);
 
     try {
-      const uid = await getUid();
+      const uid = user?.uid;
       if (!uid) {
         setError('Napaka: uporabnik ni prijavljen.');
         setIsLoading(false);

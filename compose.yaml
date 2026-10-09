@@ -1,0 +1,131 @@
+name: omreznina
+
+services:
+  firebase:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.firebase
+    init: true
+    environment:
+      FIREBASE_PROJECT_ID: demo-omreznina
+    ports:
+      - "127.0.0.1:4000:4000"
+      - "127.0.0.1:4500:4500"
+      - "127.0.0.1:8081:8081"
+      - "127.0.0.1:9099:9099"
+      - "127.0.0.1:9150:9150"
+    volumes:
+      - firebase-data:/data
+    stop_signal: SIGINT
+    stop_grace_period: 1m
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "const net=require('node:net');Promise.all([9099,8081,4000].map(port=>new Promise((resolve,reject)=>{const socket=net.connect(port,'127.0.0.1',()=>{socket.end();resolve();});socket.setTimeout(2000,()=>socket.destroy(new Error('timeout')));socket.on('error',reject);}))).catch(()=>process.exit(1));"
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  parser:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.parser
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/', timeout=3).read()"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  prekoracitve:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.prekoracitev
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/', timeout=3).read()"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  predikcija:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.machinLearning
+    environment:
+      WEATHER_ENABLED: ${WEATHER_ENABLED:-true}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/', timeout=3).read()"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    environment:
+      SERVER_ADDRESS: 0.0.0.0
+      SERVER_PORT: "8080"
+      FIREBASE_MODE: emulator
+      FIREBASE_PROJECT_ID: demo-omreznina
+      FIRESTORE_EMULATOR_HOST: firebase:8081
+      FIREBASE_AUTH_EMULATOR_HOST: firebase:9099
+      PARSER_BASE_URL: http://parser:8000
+      POWER_BASE_URL: http://prekoracitve:8000
+      PREDICTION_BASE_URL: http://predikcija:8000
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY:-}
+      LOCAL_LATITUDE: ${LOCAL_LATITUDE:-46.0569}
+      LOCAL_LONGITUDE: ${LOCAL_LONGITUDE:-14.5058}
+      MFA_ENCRYPTION_KEY: ${MFA_ENCRYPTION_KEY:-omreznina-local-mfa-key-12345678}
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      firebase:
+        condition: service_healthy
+      parser:
+        condition: service_healthy
+      prekoracitve:
+        condition: service_healthy
+      predikcija:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:8080/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    environment:
+      VITE_BASE_PATH: /
+      VITE_API_BASE_URL: /api
+      VITE_API_PROXY_TARGET: http://backend:8080
+      VITE_USE_FIREBASE_EMULATORS: "true"
+      VITE_FIREBASE_PROJECT_ID: demo-omreznina
+      VITE_FIREBASE_AUTH_EMULATOR_HOST: 127.0.0.1
+      VITE_FIREBASE_AUTH_EMULATOR_PORT: "9099"
+      VITE_FIREBASE_FIRESTORE_EMULATOR_HOST: 127.0.0.1
+      VITE_FIREBASE_FIRESTORE_EMULATOR_PORT: "8081"
+    ports:
+      - "127.0.0.1:5173:5173"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:5173/').then(r=>{if(!r.ok)process.exit(1);}).catch(()=>process.exit(1));"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+volumes:
+  firebase-data:

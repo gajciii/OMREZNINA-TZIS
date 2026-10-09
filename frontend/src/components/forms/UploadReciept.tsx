@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Label, TextInput, Button, Accordion } from 'flowbite-react';
-import { auth } from 'src/firebase-config';
+import { useAuth } from 'src/contexts/AuthContext';
 import { uploadManualInvoice, ManualInvoice } from 'src/index';
 import { debounce } from 'lodash';
 
 export default function ManualInvoiceForm() {
+  const { user } = useAuth();
+  const uid = user?.uid;
   const [year, setYear] = useState('');
   const [month, setMonth] = useState('');
   const [totalAmount, setTotalAmount] = useState('');
@@ -17,9 +19,6 @@ export default function ManualInvoiceForm() {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
-
-  const keyId = auth.config.apiKey;
-  const userSessionid = 'firebase:authUser:' + keyId + ':[DEFAULT]';
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 9 }, (_, i) => `${currentYear - i}`);
@@ -37,19 +36,6 @@ export default function ManualInvoiceForm() {
     { value: '11', label: 'November' },
     { value: '12', label: 'December' },
   ];
-
-  const getUid = (): string => {
-    const sessionUser = sessionStorage.getItem(userSessionid);
-    if (sessionUser) {
-      try {
-        const user = JSON.parse(sessionUser);
-        if ('uid' in user) {
-          return user.uid;
-        }
-      } catch {}
-    }
-    return '';
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,7 +55,6 @@ export default function ManualInvoiceForm() {
 
     setLoading(true);
 
-    const uid = getUid();
     if (!uid) {
       alert('Napaka: UID ni na voljo.');
       setLoading(false);
@@ -117,7 +102,6 @@ export default function ManualInvoiceForm() {
 }, 1000);
 
   useEffect(() => {
-    const uid = getUid();
     if (!uid || !year || !month) return;
 
     const invoice: ManualInvoice = {
@@ -133,17 +117,18 @@ export default function ManualInvoiceForm() {
     };
 
     debouncedUpload(invoice);
-  }, [year, month, totalAmount, energyCost, networkCost, surcharges, penalties, vat, note]);
+    return () => debouncedUpload.cancel();
+  }, [uid, year, month, totalAmount, energyCost, networkCost, surcharges, penalties, vat, note]);
 
   return (
     <div className="p-4 space-y-4">
       <h5 className="text-xl font-semibold mb-4 text-center">Ročni vnos podatkov računa</h5>
+      {successMessage && (
+        <p className="text-sm text-green-600 bg-green-50 border border-green-200 px-3 py-2 rounded mb-4 text-center w-full">
+          ✅ {successMessage}
+        </p>
+      )}
       <div className="sm:hidden flex flex-col items-center w-full">
-        {successMessage && (
-          <p className="text-sm text-green-600 bg-green-50 border border-green-200 px-3 py-2 rounded mb-4 text-center w-full">
-            ✅ {successMessage}
-          </p>
-        )}
         <form onSubmit={handleSubmit} className="w-full flex flex-col items-center">
           <div className="w-full flex flex-col gap-4 items-center">
             <div className="flex flex-col gap-2 w-full">

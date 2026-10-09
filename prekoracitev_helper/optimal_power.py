@@ -1,6 +1,9 @@
 import numpy as np
 import pandas as pd
-from time_block import TimeBlockBuilder
+if __package__:
+    from .time_block import TimeBlockBuilder
+else:
+    from time_block import TimeBlockBuilder
 
 def process_file_optimal(file, agreed_power_map, step=0.1, min_power=4.6, max_delta=3):
     agreed_power_map = {str(k): v for k, v in agreed_power_map.items()}
@@ -46,12 +49,12 @@ def process_file_optimal(file, agreed_power_map, step=0.1, min_power=4.6, max_de
                 max_overrun_row = block_group[block_group["P+ Prejeta delovna moč"] > agreed_power]
                 if not max_overrun_row.empty:
                     max_row = max_overrun_row.loc[max_overrun_row["P+ Prejeta delovna moč"].idxmax()]
-                    max_power = round(max_row["P+ Prejeta delovna moč"], 2)
+                    max_power = round(float(max_row["P+ Prejeta delovna moč"]), 2)
                     overrun_delta = max_power - agreed_power
                     penalty_price = round(overrun_delta * block_price * 0.9, 2)
                     total_price = agreed_power_price + penalty_price
                     entries = [{
-                        "block": block_num,
+                        "block": int(block_num),
                         "blockPrice": block_price,
                         "agreedPower": agreed_power,
                         "timestamp": max_row["timestamp"].strftime("%d-%m %H:%M"),
@@ -62,10 +65,10 @@ def process_file_optimal(file, agreed_power_map, step=0.1, min_power=4.6, max_de
                     }]
                 else:
                     max_power_row = block_group.loc[block_group["P+ Prejeta delovna moč"].idxmax()]
-                    max_power = round(max_power_row["P+ Prejeta delovna moč"], 2)
+                    max_power = round(float(max_power_row["P+ Prejeta delovna moč"]), 2)
                     total_price = agreed_power_price
                     entries = [{
-                        "block": block_num,
+                        "block": int(block_num),
                         "blockPrice": block_price,
                         "agreedPower": agreed_power,
                         "timestamp": max_power_row["timestamp"].strftime("%d-%m %H:%M"),

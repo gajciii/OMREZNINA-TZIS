@@ -7,6 +7,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -21,25 +22,31 @@ public class FileService {
 	@Autowired
 	private final RestTemplate restTemplate;
 
+	@Value("${helpers.parser.base-url:http://127.0.0.1:8001}")
+	private String parserBaseUrl = "http://127.0.0.1:8001";
+
+	@Value("${helpers.power.base-url:http://127.0.0.1:8002}")
+	private String powerBaseUrl = "http://127.0.0.1:8002";
+
 	public FileService(RestTemplate restTemplate) {
 		this.restTemplate = restTemplate;
 	}
 
 	public String sendFileToParser(MultipartFile file) throws IOException {
-		String url = "https://omreznina-parser-latest.onrender.com/upload-file";
+		String url = parserBaseUrl + "/upload-file";
 
 		return upoladFile(file, null, url);
 	}
 
 	public String uploadMaxPowerConsumed(MultipartFile file, String powerByMonths)
 			throws IOException {
-		String url = "https://prekoracitev-helper.onrender.com/upload-file-dogovorjena-moc";
+		String url = powerBaseUrl + "/upload-file-dogovorjena-moc";
 
 		return upoladFile(file, powerByMonths, url);
 	}
 
 	public String calculateOptimalConsumtion(MultipartFile file, String powerByMonths) throws IOException {
-		String url = "https://prekoracitev-helper.onrender.com/optimal";
+		String url = powerBaseUrl + "/optimal";
 
 		return upoladFile(file, powerByMonths, url);
 	}

@@ -1,11 +1,17 @@
-from parser import filter_files, read_files
 import os
-from fastapi import FastAPI, UploadFile, File
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
 import shutil
 
-HOST = "0.0.0.0"
-PORT = 12345
+if __package__:
+    from .parser import filter_files, read_files, has_invalid_floats
+else:
+    from parser import filter_files, read_files, has_invalid_floats
+
+HOST = os.getenv("HOST", "127.0.0.1")
+PORT = int(os.getenv("PORT", "8001"))
 app = FastAPI()
 
 @app.get("/")
@@ -19,30 +25,20 @@ async def file_proceeser():
 
 @app.post("/upload-file")
 async def upload_file(file: UploadFile = File(...)):
-    filename = file.filename
-    save_path = f"./{filename}"
+    extension = Path(file.filename or "").suffix.lower()
+    if extension not in {".csv", ".xlsx"}:
+        raise HTTPException(status_code=400, detail="Unsupported file type")
 
-    with open(save_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-
-    filtered_files = {"csv": [], "xlsx": []}
-    if filename.lower().endswith(".csv"):
-        filtered_files["csv"].append(save_path)
-    elif filename.lower().endswith(".xlsx"):
-        filtered_files["xlsx"].append(save_path)
-    else:
-        return {"error": "Unsupported file type"}
-
-    try:
+    # Uploaded names must never overwrite local project files. Each request gets
+    # its own temporary directory, which is removed even if parsing fails.
+    with TemporaryDirectory(prefix="omreznina-parser-") as upload_dir:
+        save_path = str(Path(upload_dir) / f"upload{extension}")
+        with open(save_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        filtered_files = {"csv": [], "xlsx": []}
+        filtered_files[extension[1:]].append(save_path)
         result = read_files(filtered_files)
-    finally:
-        try:
-            os.remove(save_path)
-            print(f"Deleted file: {save_path}")
-        except Exception as e:
-            print(f"Error deleting file: {e}")
 
-    from parser import has_invalid_floats
     if has_invalid_floats(result):
         print("POZOR! JSON vsebuje še vedno NaN ali inf!!!")
     else:
@@ -52,4 +48,4 @@ async def upload_file(file: UploadFile = File(...)):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host=HOST, port=PORT, reload=True)
+    uvicorn.run(app, host=HOST, port=PORT)

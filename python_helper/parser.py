@@ -133,12 +133,14 @@ def has_invalid_floats(obj):
         return any(has_invalid_floats(v) for v in obj.values())
     elif isinstance(obj, list):
         return any(has_invalid_floats(x) for x in obj)
-    elif isinstance(obj, float):
+    elif isinstance(obj, (float, np.floating)):
         return np.isnan(obj) or np.isinf(obj)
     return False
 
 def replace_invalid_floats(obj):
-    if isinstance(obj, dict):
+    if isinstance(obj, np.generic):
+        return replace_invalid_floats(obj.item())
+    elif isinstance(obj, dict):
         return {k: replace_invalid_floats(v) for k, v in obj.items()}
     elif isinstance(obj, list):
         return [replace_invalid_floats(x) for x in obj]

@@ -5,8 +5,14 @@ import { resolve } from 'path';
 import { defineConfig, loadEnv } from 'vite';
 
 export default defineConfig(({ mode }) => {
-  // naloži .env datoteko glede na mode (development ali production)
   const env = loadEnv(mode, process.cwd());
+  const proxy = {
+    '/api': {
+      target: env.VITE_API_PROXY_TARGET || 'http://127.0.0.1:8080',
+      changeOrigin: true,
+      rewrite: (path: string) => path.replace(/^\/api(?=\/|$)/, ''),
+    },
+  };
 
   return {
     resolve: {
@@ -36,5 +42,17 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [svgr(), react()],
     base: env.VITE_BASE_PATH || '/',
+    server: {
+      host: '127.0.0.1',
+      port: 5173,
+      strictPort: true,
+      proxy,
+    },
+    preview: {
+      host: '127.0.0.1',
+      port: 5173,
+      strictPort: true,
+      proxy,
+    },
   };
 });
