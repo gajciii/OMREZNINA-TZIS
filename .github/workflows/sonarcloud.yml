@@ -1,4 +1,5 @@
-name: SonarQube
+name: SonarCloud
+
 on:
   push:
     branches:
@@ -9,34 +10,37 @@ jobs:
   build:
     name: Build and analyze
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0
+
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: 21
-          distribution: "zulu" # Alternative distribution options are available.
+          distribution: zulu
+          cache: maven
+
       - name: Cache SonarQube packages
         uses: actions/cache@v4
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
-      - name: Cache Maven packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
+
       - name: Build and analyze
         working-directory: ./backend
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mvn -B verify -Pno-integration-tests org.sonarsource.scanner.maven:sonar-maven-plugin:5.1.0.4751:sonar \
-            -Dsonar.projectKey=adam8kac_Omreznina \
-            -Dsonar.organization=adam8kac \
+            -Dsonar.projectKey=gajciii_OMREZNINA-TZIS \
+            -Dsonar.organization=gajciii \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml

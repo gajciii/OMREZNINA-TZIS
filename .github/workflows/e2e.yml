@@ -19,25 +19,14 @@ jobs:
         with:
           node-version: 22
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 21
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
       - name: Install dependencies
-        run: bash scripts/setup-local.sh
+        run: npm ci --prefix frontend --legacy-peer-deps --no-audit --no-fund
 
       - name: Build project
         run: npm --prefix frontend run build
 
       - name: Start local application
-        run: node scripts/start-local.mjs > .local/logs/launcher.log 2>&1 &
+        run: docker compose up --build --detach
         env:
           WEATHER_ENABLED: 'false'
 
@@ -47,7 +36,7 @@ jobs:
             if curl --fail --silent http://127.0.0.1:5173/api/health; then exit 0; fi
             sleep 1
           done
-          cat .local/logs/*.log
+          docker compose logs
           exit 1
 
       - name: Check local services and storage
@@ -61,7 +50,8 @@ jobs:
 
       - name: Save logs on failure
         if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: local-service-logs
-          path: .local/logs/
+        run: docker compose logs
+
+      - name: Stop local application
+        if: always()
+        run: docker compose down

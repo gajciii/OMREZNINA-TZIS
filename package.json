@@ -6,7 +6,6 @@
   "engines": { "node": ">=20.12.0" },
   "scripts": {
     "setup": "bash scripts/setup-local.sh",
-    "start": "bash start-local.sh",
     "smoke": "node scripts/smoke-local.mjs"
   },
   "devDependencies": {
