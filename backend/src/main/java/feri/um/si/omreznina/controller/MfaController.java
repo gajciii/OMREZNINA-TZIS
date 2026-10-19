@@ -54,11 +54,17 @@ public class MfaController {
 		private String uid;
 		private String secret;
 		private boolean enabled;
+
+		public SetupRequest() {
+		}
 	}
 
 	@Data
 	public static class VerifyRequest {
 		private String uid;
 		private String code;
+
+		public VerifyRequest() {
+		}
 	}
 }

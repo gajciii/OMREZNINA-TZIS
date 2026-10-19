@@ -2,14 +2,17 @@ package feri.um.si.omreznina.model;
 
 import java.time.LocalTime;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
-@AllArgsConstructor
 public class TimeRange {
 	private LocalTime from;
 	private LocalTime to;
+
+	public TimeRange(LocalTime from, LocalTime to) {
+		this.from = from;
+		this.to = to;
+	}
 
 	public TimeRange(String fromStr, String toStr) {
 		this.from = LocalTime.parse(fromStr);

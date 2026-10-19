@@ -13,4 +13,7 @@ public class ManualInvoice {
     private double penalties;
     private double vat;
     private String note;
+
+    public ManualInvoice() {
+    }
 }

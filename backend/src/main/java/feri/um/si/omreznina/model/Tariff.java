@@ -1,16 +1,20 @@
 package feri.um.si.omreznina.model;
 
 import feri.um.si.omreznina.type.TariffType;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@NoArgsConstructor
-@AllArgsConstructor
 @Data
 public class Tariff {
     private TariffType type;
     private double price;
+
+    public Tariff() {
+    }
+
+    public Tariff(TariffType type, double price) {
+        this.type = type;
+        this.price = price;
+    }
 
     public Tariff(TariffType type) {
         this.type = type;
