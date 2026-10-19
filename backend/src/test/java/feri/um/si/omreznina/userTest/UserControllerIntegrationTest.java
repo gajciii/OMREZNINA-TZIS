@@ -29,7 +29,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = {OmrezninaApplication.class, FirebaseTestConfig.class},
 		properties = {
 				"mfa.secret.encryption-key=nekTestKey123456",
-				"spring.ai.openai.api-key=dummy_test_key",
 				"openweather.api.key=ffdfdsbfjdjfbdjsfbdsbfbdsjb"
 		})
 @AutoConfigureMockMvc(addFilters = false)

@@ -37,9 +37,9 @@ Lokalna baza je ob prvi uporabi prazna. Računi in podatki iz prejšnjega Fireba
 
 Ob pravilni ustavitvi Docker Compose se uporabniki in Firestore podatki izvozijo v trajni Docker volume ter ob naslednjem zagonu obnovijo. Shranjevanje uporablja uradna [Firebase export/import mehanizma](https://firebase.google.com/docs/emulator-suite/install_and_configure).
 
-## Izbirne vremenske in AI funkcije
+## Izbirne vremenske funkcije
 
-Osnovna aplikacija ne potrebuje API ključev. Za AI klepet in trenutno temperaturo kopiraj `.env.local.example` v `.env.local` v korenu projekta in nastavi `OPENAI_API_KEY` oziroma `OPENWEATHER_API_KEY`. Po spremembi ponovno zaženi aplikacijo.
+Osnovna aplikacija ne potrebuje API ključev. Za trenutno temperaturo kopiraj `.env.local.example` v `.env.local` v korenu projekta in nastavi `OPENWEATHER_API_KEY`. Po spremembi ponovno zaženi aplikacijo.
 
 Koordinate za lokalno vremensko analizo so privzeto Ljubljana. Spremeni jih z `LOCAL_LATITUDE` in `LOCAL_LONGITUDE` v `.env.local`. Statistična predikcija uporablja lokalno Python storitev; vremenska dopolnitev uporablja Open-Meteo in ob nedostopnosti vrne prazno temperaturo. Za izklop teh zunanjih vremenskih zahtev nastavi `WEATHER_ENABLED=false`.
 

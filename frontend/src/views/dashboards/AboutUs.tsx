@@ -39,7 +39,6 @@ const AboutUs = () => {
             <li>Uvoz podatkov z mojelektro.si ali ročni vnos.</li>
             <li>Napoved prekoračitev.</li>
             <li>Vizualno spremljanje trendov, optimizacij in preteklih prekoračitev.</li>
-            <li>Pogovor s pametnim chatbotom o elektriki in omrežninah.</li>
           </ul>
         </section>
 

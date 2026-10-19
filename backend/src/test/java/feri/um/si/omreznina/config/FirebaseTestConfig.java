@@ -10,9 +10,4 @@ public class FirebaseTestConfig {
     public com.google.cloud.firestore.Firestore firestore() {
         return org.mockito.Mockito.mock(com.google.cloud.firestore.Firestore.class);
     }
-
-    @Bean(name = "restTemplateForOpenAI")
-    public org.springframework.web.client.RestTemplate restTemplateForOpenAI() {
-        return org.mockito.Mockito.mock(org.springframework.web.client.RestTemplate.class);
-    }
 }

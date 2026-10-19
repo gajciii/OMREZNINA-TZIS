@@ -64,14 +64,6 @@
     @apply rounded-md border border-border dark:border-darkborder bg-transparent dark:bg-transparent w-full text-sm;
   }
 
-  .form-control-chat input {
-    @apply rounded-md border-0 bg-transparent dark:bg-transparent w-full text-sm;
-  }
-
-  .form-control-chat input:focus {
-    @apply !border-0 bg-transparent dark:bg-transparent w-full text-sm ring-transparent dark:ring-transparent;
-  }
-
   .form-control-rounded input {
     @apply rounded-full border border-border dark:border-darkborder bg-transparent dark:bg-transparent w-full text-sm;
   }

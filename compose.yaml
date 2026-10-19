@@ -78,7 +78,6 @@ services:
       PARSER_BASE_URL: http://parser:8000
       POWER_BASE_URL: http://prekoracitve:8000
       PREDICTION_BASE_URL: http://predikcija:8000
-      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY:-}
       LOCAL_LATITUDE: ${LOCAL_LATITUDE:-46.0569}
       LOCAL_LONGITUDE: ${LOCAL_LONGITUDE:-14.5058}

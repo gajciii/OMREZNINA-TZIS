@@ -28,8 +28,7 @@ import java.util.Map;
 
 @SuppressWarnings({ "removal", "unchecked" })
 @SpringBootTest(classes = { UserService.class, FileService.class, FirestoreService.class }, properties = {
-		"mfa.secret.encryption-key=nekTestKey123456",
-		"spring.ai.openai.api-key=dummy_test_key" })
+		"mfa.secret.encryption-key=nekTestKey123456" })
 @ActiveProfiles("test")
 public class UserServiceTest {
 

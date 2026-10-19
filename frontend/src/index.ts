@@ -268,16 +268,6 @@ export const setupMfaSettings = async (uid: string, secret: string, enabled: boo
   }
 };
 
-export const openAiResponse = async (message: string) => {
-  try {
-    const response = await api.post(`chat/?prompt=${message}`);
-    return response.data;
-  } catch (error) {
-    console.log('napaka pri chatu');
-    return false;
-  }
-};
-
 export const predictMonthlyOverrun = async (req: PredictionRequest): Promise<PredictionResponse> => {
   const { uid, year, month } = req;
   const res = await api.post('/user/prediction/monthly-overrun', {
