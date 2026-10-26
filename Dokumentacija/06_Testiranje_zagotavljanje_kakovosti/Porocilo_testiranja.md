@@ -1,6 +1,6 @@
 # Poročilo o avtomatiziranem funkcionalnem testiranju Omrežnina+
 
-Avtomatizirano testiranje je potrdilo pričakovano delovanje vseh petih pregledanih primerov TP-01–TP-05. V referenčnem zagonu GitHub Actions je uspelo vseh **21 Cypress testov**, od tega **5 primerov za nalogo** in **16 obstoječih testov prijave ter registracije**. Ločeno je uspelo vseh **5 regresijskih testov parserja**. Gradnja, analiza kode in osnovno preverjanje storitev so bili prav tako uspešni.
+Avtomatizirano testiranje je potrdilo pričakovano delovanje vseh petih pregledanih primerov TP-01–TP-05. V referenčnem zagonu GitHub Actions je uspelo vseh **21 Cypress testov**, od tega **5 primerov za nalogo** in **16 obstoječih testov prijave ter registracije**. Gradnja, analiza kode in osnovno preverjanje storitev so bili prav tako uspešni.
 
 | Podatek | Vrednost |
 | --- | --- |
@@ -70,7 +70,6 @@ Vsi spodnji rezultati pripadajo referenčnemu zagonu in commitu iz uvodne tabele
 | Preverjanje | Rezultat | Dokazilo |
 | --- | --- | --- |
 | Celoten Cypress nabor v referenčnem CI | 21/21 uspešnih; 5 primerov naloge in 16 obstoječih testov avtentikacije | [Dnevnik testnega joba](https://github.com/gajciii/OMREZNINA-TZIS/actions/runs/40313013358/job/121539213345) |
-| Regresijski testi parserja v referenčnem CI | 5/5 uspešnih | Isti dnevnik, korak `Check daily CSV and XLSX parser regressions` |
 | Osnovno preverjanje storitev in shrambe | Uspešno | Isti dnevnik, korak `Check local services and storage` |
 | Gradnja in analiza SonarCloud | Job uspešno zaključen pred testnim jobom | [Build and analyze](https://github.com/gajciii/OMREZNINA-TZIS/actions/runs/40313013358/job/121538592285) |
 | Lokalni celoten Cypress nabor | 21/21 uspešnih | [Povzetek](dokazila/cypress-2026-10-26/celoten-nabor/summary.json) |
@@ -80,37 +79,28 @@ Vsi spodnji rezultati pripadajo referenčnemu zagonu in commitu iz uvodne tabele
 
 Lokalne izvedbe so potekale na macOS ARM64 z Node.js 23.11.0 in Electronom 130.0.6723.137. Izhodiščne izvedbe so uporabljale delovno različico nad commitom `1adc3ec`, ponovitev grafov pa nad `6012c21`; pripadajoča manifesta [prvih izvedb](dokazila/cypress-2026-10-26/source-sha256.json) in [ponovitve grafov](dokazila/cypress-2026-10-26/ponovitev-grafi/source-sha256.json) določata testirano vsebino. Te izvedbe so dokaz razvoja in ponovljivosti; referenčni rezultat končne različice je zagon CI na `c0a58ff`.
 
-Parser je del aplikacije, ki bere datoteke meritev in računa dnevne razlike stanj števca. [Dodatni Python testi](../../python_helper/tests/test_parser.py) preverjajo povezovanje stolpcev po tarifi, neodvisnost od vrstnega reda stolpcev, rezultat 12/1/11 kWh za CSV TP-02, obdelavo 365 dni v XLSX z zaključnim stanjem naslednjega leta in ohranitev neznane vrednosti pri manjkajoči oddani energiji. Uporabljajo sintetične podatke in ne sodijo med pet funkcionalnih primerov v brskalniku.
-
 ## Odkrite napake in izvedeni popravki
 
 | Ugotovitev | Vpliv in popravek | Preverjanje po popravku |
 | --- | --- | --- |
-| Parser je povezoval sosednja številska stolpca namesto prejete in oddane energije iste tarife. | Pri razporeditvi najprej ET/VT/MT prejete in nato ET/VT/MT oddane energije je lahko izračunal napačno porabo. Zdaj povezuje stolpce po imenu in tarifi. | Vseh 5 regresijskih testov parserja je uspešnih; TP-02 potrjuje uvoz tudi prek aplikacije. |
+| Parser je povezoval sosednja številska stolpca namesto prejete in oddane energije iste tarife. | Pri razporeditvi najprej ET/VT/MT prejete in nato ET/VT/MT oddane energije je lahko izračunal napačno porabo. Zdaj povezuje stolpce po imenu in tarifi. | TP-02 potrjuje pravilen uvoz predpisanega vzorčnega CSV prek aplikacije. |
 | Izbirnik leta pri enem razpoložljivem letu ni bil prikazan. | Koraka izbire leta iz TP-02 in TP-03 ni bilo mogoče izvesti na predpisanih podatkih. Izbirnik je zdaj na voljo tudi pri enem letu. | TP-02 in TP-03 uspešno izbereta leto in preverita vrednosti. |
 | Samodejno shranjevanje računa je lahko vrnilo odgovor pred shranitvijo vseh končnih polj. | Čakanje samo na prvi odgovor ne bi dokazovalo celotnega računa. Skripta počaka na zahtevo z vsemi pričakovanimi podatki in preveri prikaz po osvežitvi. | TP-01 preveri vse zneske in opombo pred osvežitvijo in po njej. |
 | Preverjanje namiga grafa TP-05 je bilo v prvem CI nestabilno ob ponovnem izrisu. | [Prvi zagon](https://github.com/gajciii/OMREZNINA-TZIS/actions/runs/40309454717) je imel 20/21 uspešnih Cypress testov. Popravljena poizvedba pri ponovitvah poišče trenutni SVG stolpec in ponovno sproži premik kazalca. Pričakovani vrednosti 4 in 4,4 kW sta ostali enaki. | [Zagon po popravku](https://github.com/gajciii/OMREZNINA-TZIS/actions/runs/40311399165) in referenčni skupni CI sta uspešna 21/21. |
 
 Neuspeh prvega TP-05 je bil povezan s sinhronizacijo testne skripte z grafom. Sam po sebi ni dokazoval napačnega izračuna moči aplikacije. Končno poročilo upošteva rezultat po popravku in ohranja povezavo do začetne napake.
 
-## Cevovod in dokazila
+## Cevovod in rezultati
 
 [Workflow `ci.yml`](../../.github/workflows/ci.yml) ob pushu ali spremembi pull requesta izvede naslednji potek:
 
-**Build and analyze → priprava aplikacije → osnovni testi → testi parserja → Cypress → shranjevanje dokazil → ustavitev okolja.**
+**Build and analyze → priprava aplikacije → osnovni testi → Cypress → ustavitev okolja.**
 
-Prvi job izvede Maven `verify` s profilom `no-integration-tests` in analizo SonarCloud. Drugi job `Smoke, parser and Cypress` uporablja `needs: build`, zato se začne šele po uspešnem prvem jobu. Neuspeh testa povzroči neuspeh cevovoda. Zajem dnevnikov, objava dokazil in ustavitev okolja uporabljajo `if: always()`.
+Prvi job izvede Maven `verify` s profilom `no-integration-tests` in analizo SonarCloud. Drugi job `Smoke and Cypress` uporablja `needs: build`, zato se začne šele po uspešnem prvem jobu. Neuspeh testa povzroči neuspeh cevovoda. Ustavitev okolja uporablja `if: always()`, zato se izvede tudi po neuspešnih testih.
 
-| Dokazilo | Vsebina in mesto |
-| --- | --- |
-| [Referenčni zagon CI](https://github.com/gajciii/OMREZNINA-TZIS/actions/runs/40313013358) | Testirani commit, zaporedje jobov, statusi korakov in konzolni rezultati. |
-| [Arhiv dokazil CI](https://github.com/gajciii/OMREZNINA-TZIS/actions/runs/40313013358/artifacts/12646131774) | `cypress-evidence-40313013358-1`: JUnit XML, metapodatki okolja, povzetek, videi in dnevniki aplikacije. |
-| `frontend/cypress/results/ci-40313013358-1/` | Pot rezultatov med izvajanjem CI; vsebuje `junit-[hash].xml`, `environment.json` in `summary.json`. |
-| [Lokalna dokazila v repozitoriju](dokazila/cypress-2026-10-26/) | Shranjeni JUnit XML, povzetki, metapodatki in manifesta lokalnih izvedb. |
+Rezultati so vidni v dnevniku koraka `Run functional and existing Cypress tests`: prikazani so izvedene skripte, število uspešnih in neuspešnih testov ter opis morebitne napake. JUnit izpis poroča o posameznem testnem primeru, podrobna preverjanja korakov pa so razvidna iz skripte.
 
-JUnit XML poroča o posameznem testnem primeru; podrobna preverjanja korakov so razvidna iz skripte in poteka izvajanja. Video se shrani za posamezno skripto, posnetek zaslona pa nastane ob napaki, zato pri uspešni izvedbi mapa posnetkov lahko manjka. Hash v imenu XML prepreči prepis poročil različnih skript.
-
-Arhiv CI se hrani 14 dni in ima trenutno naveden iztek **9. 11. 2026**. Za zagovor po tem datumu je treba arhiv pravočasno prenesti; lokalna dokazila, vključena v repozitorij, ostanejo dostopna.
+[Referenčni zagon](https://github.com/gajciii/OMREZNINA-TZIS/actions/runs/40313013358) dokazuje rezultate testirane različice `c0a58ff`. Po tej izvedbi sta bila iz cevovoda odstranjena ločeni zagon testov parserja in objava arhiva dokazil; pet funkcionalnih skript in njihova pričakovanja so ostali nespremenjeni.
 
 ## Omejitve in končna ocena
 

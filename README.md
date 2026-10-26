@@ -73,7 +73,7 @@ npm --prefix frontend run build
 mvn -f backend/pom.xml test
 ```
 
-GitHub Actions ob vsakem pushu ali pull requestu zažene skupni [cevovod »Build, analyze and test«](.github/workflows/ci.yml): najprej `Build and analyze`, po uspehu pa `Smoke, parser and Cypress`. Drugi job zgradi frontend, zažene lokalno aplikacijo, preveri storitve, izvede regresijske teste parserja ter vse Cypress teste in shrani dokazila. Samodejni deploy na Render ter Netlify konfiguracija sta odstranjena. Morebitne že obstoječe spletne storitve v računih teh ponudnikov je treba izklopiti v njihovih nadzornih ploščah.
+GitHub Actions ob vsakem pushu ali pull requestu zažene skupni [cevovod »Build, analyze and test«](.github/workflows/ci.yml): najprej `Build and analyze`, po uspehu pa `Smoke and Cypress`. Drugi job zgradi frontend, zažene lokalno aplikacijo, preveri storitve ter izvede vse Cypress teste. Rezultati so vidni v dnevniku GitHub Actions. Samodejni deploy na Render ter Netlify konfiguracija sta odstranjena. Morebitne že obstoječe spletne storitve v računih teh ponudnikov je treba izklopiti v njihovih nadzornih ploščah.
 
 Če so vrata zasedena, ustavi prejšnji zagon. Stanje in dnevnike vsebnikov preveri z `docker compose ps` in `docker compose logs`.
 
@@ -87,7 +87,7 @@ npm --prefix frontend run test:e2e
 
 Za interaktivni pregled uporabi `npm --prefix frontend run test:e2e:open`, za posamezni primer pa `npm --prefix frontend run test:e2e -- --spec cypress/e2e/tp01-invoice.cy.ts`.
 
-[Navodila za avtomatizirano testiranje](Dokumentacija/06_Testiranje_zagotavljanje_kakovosti/Avtomatizirano_testiranje.md) opisujejo namestitev, pripravo emulatorjev, povezavo vsakega koraka s skripto, JUnit poročila in dokazila GitHub Actions. Vsak primer pripravi svojega uporabnika, po izvedbi odstrani njegove testne podatke in ohrani namenski Auth račun.
+[Navodila za avtomatizirano testiranje](Dokumentacija/06_Testiranje_zagotavljanje_kakovosti/Avtomatizirano_testiranje.md) opisujejo namestitev, pripravo emulatorjev, povezavo vsakega koraka s skripto, JUnit poročila in rezultate GitHub Actions. Vsak primer pripravi svojega uporabnika, po izvedbi odstrani njegove testne podatke in ohrani namenski Auth račun.
 
 [Poročilo o testiranju](Dokumentacija/06_Testiranje_zagotavljanje_kakovosti/Porocilo_testiranja.md) vsebuje rezultate TP-01–TP-05, dodatnih testov, odkrite napake in popravke, omejitve pokritosti ter povezave do dokazil uspešnega skupnega CI zagona z dne 26. 10. 2026.
 

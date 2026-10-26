@@ -97,18 +97,6 @@ Za izbiro elementov se uporabljajo stabilni `data-cy` atributi, povezane oznake 
 
 Pri TP-05 vsaka sprememba naprav sproži simulacijo, nato izračun cene in nalaganje tarife. `assertSimulation` zato pri vsakem rezultatu počaka tudi na odgovor za tarifo. Preverjanje tooltipov se začne po tem zaporedju, da ga naknadni izris grafa ne prekine. TP-03 in TP-04 s pomočnikom `assertFixturesUnchanged` pred čiščenjem povratno prebereta pripravljene dokumente in preverita, da pregled podatkov ni spremenil njihovih polj.
 
-## Dodatno preverjanje parserja CSV in XLSX
-
-Pri preverjanju podprtega XLSX je bila odkrita napaka pri razporeditvi stolpcev: parser je paril sosednja številska stolpca, izvoz pa lahko najprej vsebuje prejete energije ET/VT/MT in nato oddane energije ET/VT/MT. [Popravek parserja](../../python_helper/parser.py) zdaj poveže prejeto in oddano energijo po imenu ter isti tarifi, zato vrstni red stolpcev ne spremeni izračuna. Manjkajoče meritve ostanejo `null` in se ne pretvorijo v izmišljeno ničelno porabo.
-
-[Pet regresijskih testov](../../python_helper/tests/test_parser.py) uporablja izključno sintetične podatke. Preverjajo skupine stolpcev po smeri energije, prepleten in obrnjen vrstni red, natančni CSV TP-02, XLSX s 365 dnevi in zaključnim stanjem naslednjega leta ter manjkajočo meritev oddane energije. To so dodatni testi parserja poleg petih funkcionalnih primerov v brskalniku.
-
-Ob zagnanem Docker okolju jih iz korena projekta izvedi z:
-
-```bash
-docker compose exec -T parser python -m unittest discover -s tests -v
-```
-
 ## Sledljivost vseh korakov
 
 Vsaka skripta vsebuje en test `it` za celoten izvorni primer, z označenimi koraki v `cy.log`. **JUnit poroča o uspehu celotnega primera, ne o ločenem uspehu vsakega koraka.** Spodnja matrika povezuje posamezni korak s konkretno trditvijo. Video in interaktivni dnevnik omogočata pregled poteka; pri napaki se doda posnetek zaslona in izpis neuspele trditve. Vpis v matriko pomeni implementirano preverjanje, ne že dokazane uspešne izvedbe.
@@ -192,26 +180,24 @@ Pomočnika `assertMonthlyValues` in `hoverLineDay` sta v [chart.ts](../../fronte
 | Povzetek izvedbe | `frontend/cypress/results/<runId>/summary.json`: različica Cypressa in brskalnika, začetek/konec ter število uspešnih, neuspešnih, čakajočih in preskočenih testov. |
 | Video | `frontend/cypress/videos/<runId>/`; video posamezne skripte pri `cypress run`. |
 | Posnetek napake | `frontend/cypress/screenshots/<runId>/`; samodejni posnetki ob neuspehu. Mapa pri uspešni izvedbi lahko manjka. |
-| Dnevniki aplikacije v CI | `frontend/cypress/results/docker-compose.log`; zbrani tudi ob neuspehu testov. |
 
-[Cevovod GitHub Actions »Build, analyze and test«](../../.github/workflows/ci.yml) se sproži ob `push` na katerokoli vejo in ob odprtju, posodobitvi ali ponovnem odprtju pull requesta. V istem zagonu sta povezana dva joba: **`Build and analyze` → `Smoke, parser and Cypress`**. Prvi z Javo 21 izvede Maven `verify` z obstoječim profilom `no-integration-tests` in analizo SonarCloud. Drugi ima `needs: build`, zato se začne po uspešnem prvem jobu; ob napaki gradnje ali analize je preskočen. [Odvisnosti med jobi](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-jobs).
+[Cevovod GitHub Actions »Build, analyze and test«](../../.github/workflows/ci.yml) se sproži ob `push` na katerokoli vejo in ob odprtju, posodobitvi ali ponovnem odprtju pull requesta. V istem zagonu sta povezana dva joba: **`Build and analyze` → `Smoke and Cypress`**. Prvi z Javo 21 izvede Maven `verify` z obstoječim profilom `no-integration-tests` in analizo SonarCloud. Drugi ima `needs: build`, zato se začne po uspešnem prvem jobu; ob napaki gradnje ali analize je preskočen. [Odvisnosti med jobi](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-jobs).
 
 Zaporedje drugega joba je:
 
 1. Prevzem kode, Node.js 22, namestitev zaklenjenih odvisnosti, gradnja frontenda in preverjanje Cypressa.
 2. Zagon celotne aplikacije z Docker Compose ter čakanje na zdravje storitev in dosegljivost aplikacije.
 3. `npm run smoke` za osnovno preverjanje storitev in shrambe.
-4. `docker compose exec -T parser python -m unittest discover -s tests -v` za pet regresijskih testov parserja CSV/XLSX; rezultati so v dnevniku tega koraka.
-5. `npm --prefix frontend run test:e2e` za pet funkcionalnih primerov in obstoječe Cypress teste.
-6. Zajem dnevnikov, objava dokazil z `if: always()` in ustavitev vsebnikov, tudi kadar testi ne uspejo.
+4. `npm --prefix frontend run test:e2e` za pet funkcionalnih primerov in obstoječe Cypress teste.
+5. Ustavitev vsebnikov z `if: always()`, tudi kadar testi ne uspejo.
 
-Neuspešen Cypress test pomeni neuspešen korak in neuspeh skupnega cevovoda. Dokazila so pripeta izvedbi Actions kot **`cypress-evidence-<run_id>-<run_attempt>`** in se hranijo **14 dni**. Testi uporabljajo lokalne emulatorje in za te funkcionalne primere ne potrebujejo produkcijskih Firebase poverilnic ali Cypress Cloud računa. Prejšnja ločena workflowa `sonarcloud.yml` in `e2e.yml` sta združena v `ci.yml`, zato se gradnja, analiza in testi prikažejo skupaj v enem zagonu.
+Neuspešen Cypress test pomeni neuspešen korak in neuspeh skupnega cevovoda. Rezultati so vidni v dnevniku koraka za Cypress. Cevovod ne objavlja arhiva dokazil; datoteke iz zgornje tabele so pri lokalnem zagonu dostopne na računalniku, v CI pa ostanejo samo na začasnem izvajalcu. Testi uporabljajo lokalne emulatorje in za te funkcionalne primere ne potrebujejo produkcijskih Firebase poverilnic ali Cypress Cloud računa. Prejšnja ločena workflowa `sonarcloud.yml` in `e2e.yml` sta združena v `ci.yml`, zato se gradnja, analiza in testi prikažejo skupaj v enem zagonu.
 
-Oba joba uporabljata določeno okolje `ubuntu-24.04`. Dejanja `checkout`, `setup-node`, `upload-artifact`, `setup-java` in `cache` so posodobljena na izdaje, ki se izvajajo z Node.js 24. Projektni ukazi še vedno uporabljajo Node.js 22. S tem odpravimo [opozorilo o opuščenem Node.js 20 za dejanja](https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/) in vpliv [prehoda oznake ubuntu-latest na Ubuntu 26.04](https://github.com/actions/runner-images/issues/14748).
+Oba joba uporabljata določeno okolje `ubuntu-24.04`. Dejanja `checkout`, `setup-node`, `setup-java` in `cache` so posodobljena na izdaje, ki se izvajajo z Node.js 24. Projektni ukazi še vedno uporabljajo Node.js 22. S tem odpravimo [opozorilo o opuščenem Node.js 20 za dejanja](https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/) in vpliv [prehoda oznake ubuntu-latest na Ubuntu 26.04](https://github.com/actions/runner-images/issues/14748).
 
 ## Evidenca dejanske izvedbe in pregled uporabnika
 
-Avtomatizirane skripte je pripravil in 26. 10. 2026 izvedel agent UI. Lokalna izvedba celotnega nabora je bila uspešna: **21/21 testov**, brez napak ali preskočenih testov. Ponovitev TP-01–TP-05 je uspela **5/5**, vsak primer pa tudi v samostojnem procesu. Uspešni so še gradnja frontenda, preverjanje namestitve Cypressa, smoke test in vseh **5 regresijskih testov parserja**.
+Avtomatizirane skripte je pripravil in 26. 10. 2026 izvedel agent UI. Lokalna izvedba celotnega nabora je bila uspešna: **21/21 testov**, brez napak ali preskočenih testov. Ponovitev TP-01–TP-05 je uspela **5/5**, vsak primer pa tudi v samostojnem procesu. Uspešni so še gradnja frontenda, preverjanje namestitve Cypressa in smoke test.
 
 Dokazila so shranjena v [mapi izvedbe](dokazila/cypress-2026-10-26/): [celoten nabor](dokazila/cypress-2026-10-26/celoten-nabor/summary.json), [ponovitev](dokazila/cypress-2026-10-26/ponovitev-tp/summary.json), JUnit XML in metapodatki vsakega samostojnega zagona. Testirana je bila delovna različica nad commitom `1adc3ec9f84201d8c525769ba93bf6cab992e314`; [SHA-256 manifest](dokazila/cypress-2026-10-26/source-sha256.json) določa vsebino spremenjenih testnih in aplikacijskih datotek. Okolje: macOS ARM64, Node.js 23.11.0, Cypress 14.3.3 in Electron 130.0.6723.137. Cevovod uporablja Node.js 22.
 
@@ -236,7 +222,7 @@ Naslednji seznam je namenjen **uporabnikovemu pregledu**. Agent ga ne označuje 
 - [ ] Preveril/-a sem, da trditve zajamejo pričakovane vrednosti in stanja uporabniškega vmesnika.
 - [ ] Preveril/-a sem selektorje, čakanje na dogodke oziroma elemente in neodvisnost testov.
 - [ ] Pregledal/-a sem dejansko lokalno izvedbo, samostojen zagon primerov in ponovljivost.
-- [ ] Pregledal/-a sem izvedbo GitHub Actions ter prenesel/-la ustrezna dokazila.
+- [ ] Pregledal/-a sem izvedbo GitHub Actions in rezultate v dnevniku testov.
 
 | Podatek o človeškem pregledu | Vrednost |
 | --- | --- |
