@@ -27,3 +27,4 @@ dist-ssr
 # Cypress
 cypress/screenshots/
 cypress/videos/
+cypress/results/

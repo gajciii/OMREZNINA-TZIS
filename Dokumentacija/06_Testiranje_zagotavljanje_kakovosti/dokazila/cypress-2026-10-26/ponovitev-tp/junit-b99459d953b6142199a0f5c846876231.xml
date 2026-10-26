@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Mocha Tests" time="3.593" tests="1" failures="0">
+  <testsuite name="Root Suite" timestamp="2026-10-26T10:39:07" tests="0" file="cypress/e2e/tp04-costs.cy.ts" time="0.000" failures="0">
+  </testsuite>
+  <testsuite name="TP-04: Ločen prikaz stroškov energije in omrežnine" timestamp="2026-10-26T10:39:07" tests="1" time="3.593" failures="0">
+    <testcase name="TP-04: Ločen prikaz stroškov energije in omrežnine prikaže ločene označene zneske in jih ob preklopu na februar zamenja" time="3.476" classname="prikaže ločene označene zneske in jih ob preklopu na februar zamenja">
+    </testcase>
+  </testsuite>
+</testsuites>

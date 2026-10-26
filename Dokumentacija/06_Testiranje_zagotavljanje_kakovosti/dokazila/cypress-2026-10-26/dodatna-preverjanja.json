@@ -1,0 +1,13 @@
+{
+  "date": "2026-10-26",
+  "executor": "ChatGPT – agent UI",
+  "frontendBuild": "npm --prefix frontend run build: exit 0",
+  "cypressVerification": "Cypress 14.3.3 verified; ELECTRON_RUN_AS_NODE removed in this host",
+  "parserCommand": "docker compose run --rm --no-deps parser python -m unittest discover -s tests -v",
+  "parserTests": {
+    "passed": 5,
+    "failed": 0
+  },
+  "smoke": "npm run smoke: exit 0",
+  "workflowYaml": "parsed and checked push/PR triggers, always logs/artifact/cleanup"
+}

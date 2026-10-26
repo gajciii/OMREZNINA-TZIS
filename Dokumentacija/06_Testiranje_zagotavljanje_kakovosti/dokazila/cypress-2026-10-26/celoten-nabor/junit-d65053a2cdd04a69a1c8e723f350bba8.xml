@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Mocha Tests" time="4.064" tests="1" failures="0">
+  <testsuite name="Root Suite" timestamp="2026-10-26T10:37:53" tests="0" file="cypress/e2e/tp03-consumption.cy.ts" time="0.000" failures="0">
+  </testsuite>
+  <testsuite name="TP-03: Pravilen prikaz mesečne porabe elektrike" timestamp="2026-10-26T10:37:53" tests="1" time="4.064" failures="0">
+    <testcase name="TP-03: Pravilen prikaz mesečne porabe elektrike prikaže vsoti 30/20 kWh in pravilno loči dnevne podatke obeh mesecev" time="3.936" classname="prikaže vsoti 30/20 kWh in pravilno loči dnevne podatke obeh mesecev">
+    </testcase>
+  </testsuite>
+</testsuites>

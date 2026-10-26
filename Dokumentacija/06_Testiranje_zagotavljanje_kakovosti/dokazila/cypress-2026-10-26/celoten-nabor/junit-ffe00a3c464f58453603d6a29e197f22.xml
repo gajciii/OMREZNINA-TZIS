@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Mocha Tests" time="7.961" tests="1" failures="0">
+  <testsuite name="Root Suite" timestamp="2026-10-26T10:37:29" tests="0" file="cypress/e2e/local-auth.cy.ts" time="0.000" failures="0">
+  </testsuite>
+  <testsuite name="Lokalna prijava in podatki uporabnika" timestamp="2026-10-26T10:37:29" tests="1" time="7.961" failures="0">
+    <testcase name="Lokalna prijava in podatki uporabnika registrira in potrdi email ter shrani račun po obnovljeni prijavi z zapomnjeno napravo" time="7.893" classname="registrira in potrdi email ter shrani račun po obnovljeni prijavi z zapomnjeno napravo">
+    </testcase>
+  </testsuite>
+</testsuites>

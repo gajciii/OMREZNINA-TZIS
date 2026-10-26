@@ -107,24 +107,28 @@ def calulate_delta(df: pd.DataFrame):
     }
     delta_values = {}
     tariff_values = {}
-    columns = df.select_dtypes(include=["float64", "int64"]).columns
+    columns = df.select_dtypes(include=[np.number]).columns
 
-    for col in df.describe().columns:
+    for col in columns:
         delta_values[f"delta {col}"] = df[col].diff().shift(-1)
 
-    for i in range(0, len(columns) - 1, 2):
-        col1_name = columns[i]
-        col2_name = columns[i + 1]
+    # MojElektro groups received ET/VT/MT before exported ET/VT/MT;
+    # the synthetic CSV can interleave them. Match the energy and tariff
+    # explicitly so column order never changes the meaning of consumption.
+    columns_by_name = {" ".join(str(col).split()).casefold(): col for col in columns}
+    for tariff, price in tariffs.items():
+        received_column = columns_by_name.get(f"prejeta delovna energija {tariff}")
+        exported_column = columns_by_name.get(f"oddana delovna energija {tariff}")
+        if received_column is None or exported_column is None:
+            continue
 
-        series1 = delta_values.get(f"delta {col1_name}")
-        series2 = delta_values.get(f"delta {col2_name}")
-
-        if series1 is not None and series2 is not None:
-            new_col_name = col1_name.strip().split(" ")[-1].lower()
-            consumption = series1 - series2
-            delta_values[f"poraba {new_col_name}"] = consumption
-            delta_values[f"cena energije {new_col_name}"] = consumption * tariffs[new_col_name]
-            tariff_values[f"tarifa za {new_col_name}"] = tariffs[new_col_name]
+        consumption = (
+            delta_values[f"delta {received_column}"]
+            - delta_values[f"delta {exported_column}"]
+        )
+        delta_values[f"poraba {tariff}"] = consumption
+        delta_values[f"cena energije {tariff}"] = consumption * price
+        tariff_values[f"tarifa za {tariff}"] = price
 
     return delta_values, tariff_values
 

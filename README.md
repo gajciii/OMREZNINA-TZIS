@@ -77,4 +77,16 @@ GitHub Actions preverja lokalni sistem in Cypress teste. Samodejni deploy na Ren
 
 Če so vrata zasedena, ustavi prejšnji zagon. Stanje in dnevnike vsebnikov preveri z `docker compose ps` in `docker compose logs`.
 
+## Avtomatizirani funkcionalni testi
+
+Cypress preverja dokumentirane primere TP-01–TP-05: vnos računa, uvoz CSV, mesečno in dnevno porabo, stroškovne postavke ter simulacijo prekoračitve. Ob zagnani aplikaciji zaženi iz korena projekta:
+
+```bash
+npm --prefix frontend run test:e2e
+```
+
+Za interaktivni pregled uporabi `npm --prefix frontend run test:e2e:open`, za posamezni primer pa `npm --prefix frontend run test:e2e -- --spec cypress/e2e/tp01-invoice.cy.ts`.
+
+[Navodila za avtomatizirano testiranje](Dokumentacija/06_Testiranje_zagotavljanje_kakovosti/Avtomatizirano_testiranje.md) opisujejo namestitev, pripravo emulatorjev, povezavo vsakega koraka s skripto, JUnit poročila in dokazila GitHub Actions. Vsak primer pripravi svojega uporabnika, po izvedbi odstrani njegove testne podatke in ohrani namenski Auth račun.
+
 [Dokumentacija projekta](https://omreznina.gitbook.io/omreznina+) · [GitHub](https://github.com/adam8kac/Omreznina)
