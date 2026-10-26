@@ -122,11 +122,12 @@ const UploadInvoice: React.FC = () => {
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="w-full flex flex-col items-center">
+          <form data-cy="daily-upload-form" onSubmit={handleSubmit} className="w-full flex flex-col items-center">
             <div className="w-full flex flex-col gap-4 items-center">
               <Label htmlFor="fileInput" value="Izberi datoteko" className="mb-1 block text-center" />
               <FileInput
                 id="fileInput"
+                data-cy="daily-upload-file"
                 ref={fileInputRef}
                 accept=".xlsx,.csv"
                 onChange={handleFileChange}
@@ -158,10 +159,10 @@ const UploadInvoice: React.FC = () => {
               </Button>
             </div>
             {error && error !== 'Naloži datoteko.' && (
-              <div className="mt-3 text-red-600 text-sm font-medium text-center w-full">⚠️ {error}</div>
+              <div data-cy="daily-upload-error" role="alert" className="mt-3 text-red-600 text-sm font-medium text-center w-full">⚠️ {error}</div>
             )}
             {resultMsg && (
-              <div className="mt-3 text-green-600 text-sm font-medium text-center w-full">✅ {resultMsg}</div>
+              <div data-cy="daily-upload-success" role="status" className="mt-3 text-green-600 text-sm font-medium text-center w-full">✅ {resultMsg}</div>
             )}
           </form>
         )}
@@ -222,13 +223,14 @@ const UploadInvoice: React.FC = () => {
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit}>
+          <form data-cy="daily-upload-form" onSubmit={handleSubmit}>
             <div className="grid grid-cols-12 gap-6">
               <div className="lg:col-span-6 col-span-12 flex flex-col gap-4">
                 <div>
                   <Label htmlFor="fileInput" value="Izberi datoteko" className="mb-1 block" />
                   <FileInput
                     id="fileInput"
+                    data-cy="daily-upload-file"
                     ref={fileInputRef}
                     accept=".xlsx,.csv"
                     onChange={handleFileChange}
@@ -263,10 +265,10 @@ const UploadInvoice: React.FC = () => {
                 </Button>
               </div>
               {error && error !== 'Naloži datoteko.' && (
-                <div className="col-span-12 mt-3 text-red-600 text-sm font-medium">⚠️ {error}</div>
+                <div data-cy="daily-upload-error" role="alert" className="col-span-12 mt-3 text-red-600 text-sm font-medium">⚠️ {error}</div>
               )}
               {resultMsg && (
-                <div className="col-span-12 mt-3 text-green-600 text-sm font-medium">✅ {resultMsg}</div>
+                <div data-cy="daily-upload-success" role="status" className="col-span-12 mt-3 text-green-600 text-sm font-medium">✅ {resultMsg}</div>
               )}
             </div>
           </form>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Mocha Tests" time="6.076" tests="1" failures="0">
+  <testsuite name="Root Suite" timestamp="2026-10-26T10:35:12" tests="0" file="cypress/e2e/tp05-simulation.cy.ts" time="0.000" failures="0">
+  </testsuite>
+  <testsuite name="TP-05: Simulacija uporabe naprav in zaznava prekoračitve" timestamp="2026-10-26T10:35:12" tests="1" time="6.075" failures="0">
+    <testcase name="TP-05: Simulacija uporabe naprav in zaznava prekoračitve preveri moč pod mejo, na meji in nad njo, graf ter vrnitev pod mejo" time="5.765" classname="preveri moč pod mejo, na meji in nad njo, graf ter vrnitev pod mejo">
+    </testcase>
+  </testsuite>
+</testsuites>

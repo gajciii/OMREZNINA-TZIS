@@ -124,17 +124,18 @@ export default function ManualInvoiceForm() {
     <div className="p-4 space-y-4">
       <h5 className="text-xl font-semibold mb-4 text-center">Ročni vnos podatkov računa</h5>
       {successMessage && (
-        <p className="text-sm text-green-600 bg-green-50 border border-green-200 px-3 py-2 rounded mb-4 text-center w-full">
+        <p role="status" data-cy="invoice-save-success" className="text-sm text-green-600 bg-green-50 border border-green-200 px-3 py-2 rounded mb-4 text-center w-full">
           ✅ {successMessage}
         </p>
       )}
       <div className="sm:hidden flex flex-col items-center w-full">
-        <form onSubmit={handleSubmit} className="w-full flex flex-col items-center">
+        <form data-cy="manual-invoice-form" onSubmit={handleSubmit} className="w-full flex flex-col items-center">
           <div className="w-full flex flex-col gap-4 items-center">
             <div className="flex flex-col gap-2 w-full">
-              <Label htmlFor="year" value="Leto" className="mb-1 block" />
+              <Label htmlFor="mobile-year" value="Leto" className="mb-1 block" />
               <select
-                id="year"
+                id="mobile-year"
+                data-cy="invoice-year"
                 value={year}
                 onChange={(e) => setYear(e.target.value)}
                 className={`w-full border border-primary/40 p-2 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition text-base bg-white ${errors.year ? 'border-red-500' : ''}`}
@@ -147,9 +148,10 @@ export default function ManualInvoiceForm() {
               {errors.year && <p className="text-sm text-red-600 mt-1">⚠️ {errors.year}</p>}
             </div>
             <div className="flex flex-col gap-2 w-full">
-              <Label htmlFor="month" value="Mesec" className="mb-1 block" />
+              <Label htmlFor="mobile-month" value="Mesec" className="mb-1 block" />
               <select
-                id="month"
+                id="mobile-month"
+                data-cy="invoice-month"
                 value={month}
                 onChange={(e) => setMonth(e.target.value)}
                 className={`w-full border border-primary/40 p-2 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition text-base bg-white ${errors.month ? 'border-red-500' : ''}`}
@@ -162,9 +164,10 @@ export default function ManualInvoiceForm() {
               {errors.month && <p className="text-sm text-red-600 mt-1">⚠️ {errors.month}</p>}
             </div>
             <div className="flex flex-col gap-2 w-full">
-              <Label htmlFor="totalAmount" value="Znesek skupaj (€)" className="mb-1 block" />
+              <Label htmlFor="mobile-totalAmount" value="Znesek skupaj (€)" className="mb-1 block" />
               <TextInput
-                id="totalAmount"
+                id="mobile-totalAmount"
+                data-cy="invoice-totalAmount"
                 type="number"
                 step="0.01"
                 min="0"
@@ -175,9 +178,10 @@ export default function ManualInvoiceForm() {
               {errors.totalAmount && <p className="text-sm text-red-600 mt-1">⚠️ {errors.totalAmount}</p>}
             </div>
             <div className="flex flex-col gap-2 w-full">
-              <Label htmlFor="energyCost" value="Strošek energije (€)" className="mb-1 block" />
+              <Label htmlFor="mobile-energyCost" value="Strošek energije (€)" className="mb-1 block" />
               <TextInput
-                id="energyCost"
+                id="mobile-energyCost"
+                data-cy="invoice-energyCost"
                 type="number"
                 step="0.01"
                 min="0"
@@ -188,9 +192,10 @@ export default function ManualInvoiceForm() {
               {errors.energyCost && <p className="text-sm text-red-600 mt-1">⚠️ {errors.energyCost}</p>}
             </div>
             <div className="flex flex-col gap-2 w-full">
-              <Label htmlFor="networkCost" value="Omrežnina (€)" className="mb-1 block" />
+              <Label htmlFor="mobile-networkCost" value="Omrežnina (€)" className="mb-1 block" />
               <TextInput
-                id="networkCost"
+                id="mobile-networkCost"
+                data-cy="invoice-networkCost"
                 type="number"
                 step="0.01"
                 min="0"
@@ -201,9 +206,10 @@ export default function ManualInvoiceForm() {
               {errors.networkCost && <p className="text-sm text-red-600 mt-1">⚠️ {errors.networkCost}</p>}
             </div>
             <div className="flex flex-col gap-2 w-full">
-              <Label htmlFor="surcharges" value="Prispevki in ostalo (€)" className="mb-1 block" />
+              <Label htmlFor="mobile-surcharges" value="Prispevki in ostalo (€)" className="mb-1 block" />
               <TextInput
-                id="surcharges"
+                id="mobile-surcharges"
+                data-cy="invoice-surcharges"
                 type="number"
                 step="0.01"
                 min="0"
@@ -214,9 +220,10 @@ export default function ManualInvoiceForm() {
               {errors.surcharges && <p className="text-sm text-red-600 mt-1">⚠️ {errors.surcharges}</p>}
             </div>
             <div className="flex flex-col gap-2 w-full">
-              <Label htmlFor="penalties" value="Penali (€)" className="mb-1 block" />
+              <Label htmlFor="mobile-penalties" value="Penali (€)" className="mb-1 block" />
               <TextInput
-                id="penalties"
+                id="mobile-penalties"
+                data-cy="invoice-penalties"
                 type="number"
                 step="0.01"
                 min="0"
@@ -227,9 +234,10 @@ export default function ManualInvoiceForm() {
               {errors.penalties && <p className="text-sm text-red-600 mt-1">⚠️ {errors.penalties}</p>}
             </div>
             <div className="flex flex-col gap-2 w-full">
-              <Label htmlFor="vat" value="DDV (€)" className="mb-1 block" />
+              <Label htmlFor="mobile-vat" value="DDV (€)" className="mb-1 block" />
               <TextInput
-                id="vat"
+                id="mobile-vat"
+                data-cy="invoice-vat"
                 type="number"
                 step="0.01"
                 min="0"
@@ -240,9 +248,10 @@ export default function ManualInvoiceForm() {
               {errors.vat && <p className="text-sm text-red-600 mt-1">⚠️ {errors.vat}</p>}
             </div>
             <div className="flex flex-col gap-2 w-full">
-              <Label htmlFor="note" value="Opomba" className="mb-1 block" />
+              <Label htmlFor="mobile-note" value="Opomba" className="mb-1 block" />
               <TextInput
-                id="note"
+                id="mobile-note"
+                data-cy="invoice-note"
                 type="text"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
@@ -398,7 +407,7 @@ export default function ManualInvoiceForm() {
         </div>
       </div>
       <div className="hidden sm:block">
-        <form onSubmit={handleSubmit}>
+        <form data-cy="manual-invoice-form" onSubmit={handleSubmit}>
           <div className="grid grid-cols-12 gap-6">
             <div className="lg:col-span-6 col-span-12 flex flex-col gap-4">
               <div className="flex flex-col sm:flex-row gap-2 w-full">
@@ -406,6 +415,7 @@ export default function ManualInvoiceForm() {
                   <Label htmlFor="year" value="Leto" className="mb-1 block" />
                   <select
                     id="year"
+                    data-cy="invoice-year"
                     value={year}
                     onChange={(e) => setYear(e.target.value)}
                     className={`w-full border border-primary/40 p-2 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition text-base bg-white ${errors.year ? 'border-red-500' : ''}`}
@@ -421,6 +431,7 @@ export default function ManualInvoiceForm() {
                   <Label htmlFor="month" value="Mesec" className="mb-1 block" />
                   <select
                     id="month"
+                    data-cy="invoice-month"
                     value={month}
                     onChange={(e) => setMonth(e.target.value)}
                     className={`w-full border border-primary/40 p-2 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition text-base bg-white ${errors.month ? 'border-red-500' : ''}`}
@@ -438,6 +449,7 @@ export default function ManualInvoiceForm() {
                 <Label htmlFor="totalAmount" value="Znesek skupaj (€)" className="mb-1 block" />
                 <TextInput
                   id="totalAmount"
+                  data-cy="invoice-totalAmount"
                   type="number"
                   step="0.01"
                   min="0"
@@ -452,6 +464,7 @@ export default function ManualInvoiceForm() {
                 <Label htmlFor="energyCost" value="Strošek energije (€)" className="mb-1 block" />
                 <TextInput
                   id="energyCost"
+                  data-cy="invoice-energyCost"
                   type="number"
                   step="0.01"
                   min="0"
@@ -466,6 +479,7 @@ export default function ManualInvoiceForm() {
                 <Label htmlFor="networkCost" value="Omrežnina (€)" className="mb-1 block" />
                 <TextInput
                   id="networkCost"
+                  data-cy="invoice-networkCost"
                   type="number"
                   step="0.01"
                   min="0"
@@ -482,6 +496,7 @@ export default function ManualInvoiceForm() {
                 <Label htmlFor="surcharges" value="Prispevki in ostalo (€)" className="mb-1 block" />
                 <TextInput
                   id="surcharges"
+                  data-cy="invoice-surcharges"
                   type="number"
                   step="0.01"
                   min="0"
@@ -496,6 +511,7 @@ export default function ManualInvoiceForm() {
                 <Label htmlFor="penalties" value="Penali (€)" className="mb-1 block" />
                 <TextInput
                   id="penalties"
+                  data-cy="invoice-penalties"
                   type="number"
                   step="0.01"
                   min="0"
@@ -510,6 +526,7 @@ export default function ManualInvoiceForm() {
                 <Label htmlFor="vat" value="DDV (€)" className="mb-1 block" />
                 <TextInput
                   id="vat"
+                  data-cy="invoice-vat"
                   type="number"
                   step="0.01"
                   min="0"
@@ -524,6 +541,7 @@ export default function ManualInvoiceForm() {
                 <Label htmlFor="note" value="Opomba" className="mb-1 block" />
                 <TextInput
                   id="note"
+                  data-cy="invoice-note"
                   type="text"
                   value={note}
                   onChange={(e) => setNote(e.target.value)}

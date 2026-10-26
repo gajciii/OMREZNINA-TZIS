@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Mocha Tests" time="7.194" tests="1" failures="0">
+  <testsuite name="Root Suite" timestamp="2026-10-26T10:39:37" tests="0" file="cypress/e2e/tp01-invoice.cy.ts" time="0.000" failures="0">
+  </testsuite>
+  <testsuite name="TP-01: Ročni vnos in shranjevanje računa" timestamp="2026-10-26T10:39:37" tests="1" time="7.194" failures="0">
+    <testcase name="TP-01: Ročni vnos in shranjevanje računa shrani januarski račun z vsemi postavkami in ohrani podatke po osvežitvi" time="7.062" classname="shrani januarski račun z vsemi postavkami in ohrani podatke po osvežitvi">
+    </testcase>
+  </testsuite>
+</testsuites>

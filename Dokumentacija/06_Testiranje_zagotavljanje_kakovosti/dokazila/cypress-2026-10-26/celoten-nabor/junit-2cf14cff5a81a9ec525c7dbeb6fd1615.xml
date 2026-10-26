@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Mocha Tests" time="14.800" tests="15" failures="0">
+  <testsuite name="Root Suite" timestamp="2026-10-26T10:37:12" tests="0" file="cypress/e2e/auth.cy.ts" time="0.000" failures="0">
+  </testsuite>
+  <testsuite name="Avtentikacija – Prijava in Registracija" timestamp="2026-10-26T10:37:12" tests="5" time="3.344" failures="0">
+    <testcase name="Avtentikacija – Prijava in Registracija Prikaz obrazca za prijavo" time="0.699" classname="Prikaz obrazca za prijavo">
+    </testcase>
+    <testcase name="Avtentikacija – Prijava in Registracija Napaka pri napačnih podatkih" time="1.165" classname="Napaka pri napačnih podatkih">
+    </testcase>
+    <testcase name="Avtentikacija – Prijava in Registracija Napaka ob praznih poljih" time="0.452" classname="Napaka ob praznih poljih">
+    </testcase>
+    <testcase name="Avtentikacija – Prijava in Registracija Prikaz modalnega okna za pozabljeno geslo" time="0.496" classname="Prikaz modalnega okna za pozabljeno geslo">
+    </testcase>
+    <testcase name="Avtentikacija – Prijava in Registracija Redirect za neavtenticiranega uporabnika" time="0.447" classname="Redirect za neavtenticiranega uporabnika">
+    </testcase>
+  </testsuite>
+  <testsuite name="Registracija" timestamp="2026-10-26T10:37:16" tests="10" time="11.454" failures="0">
+    <testcase name="Registracija Prikaz obrazca za registracijo" time="0.394" classname="Prikaz obrazca za registracijo">
+    </testcase>
+    <testcase name="Registracija Napaka: prazna polja" time="0.514" classname="Napaka: prazna polja">
+    </testcase>
+    <testcase name="Registracija Napaka: prazno ime je prvo validacijsko sporočilo" time="1.253" classname="Napaka: prazno ime je prvo validacijsko sporočilo">
+    </testcase>
+    <testcase name="Registracija Napaka: prazno polje za email" time="1.189" classname="Napaka: prazno polje za email">
+    </testcase>
+    <testcase name="Registracija Napaka: napačen email" time="1.457" classname="Napaka: napačen email">
+    </testcase>
+    <testcase name="Registracija Napaka: gesli se ne ujemata" time="1.628" classname="Napaka: gesli se ne ujemata">
+    </testcase>
+    <testcase name="Registracija Napaka: geslo brez simbola" time="1.511" classname="Napaka: geslo brez simbola">
+    </testcase>
+    <testcase name="Registracija Napaka: geslo brez številke" time="1.513" classname="Napaka: geslo brez številke">
+    </testcase>
+    <testcase name="Registracija Napaka: geslo prekratko" time="1.372" classname="Napaka: geslo prekratko">
+    </testcase>
+    <testcase name="Registracija Preusmeritev na prijavo" time="0.458" classname="Preusmeritev na prijavo">
+    </testcase>
+  </testsuite>
+</testsuites>

@@ -81,9 +81,7 @@ it('Napaka: napačen email', () => {
   cy.get('input#confirm-password').type('Test123!');
   cy.get('button').contains('Registracija').click();
 
-  cy.wait(200);
-
-  cy.get('body').then(($body) => {
+  cy.get('body').should(($body) => {
     const customError = $body.find('p').filter((_, el) =>
       !!el.textContent?.includes("Email mora vsebovati znak '@'.")
     );

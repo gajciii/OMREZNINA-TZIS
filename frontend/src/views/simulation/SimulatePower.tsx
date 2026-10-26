@@ -198,6 +198,9 @@ export const SimulatePower = () => {
             .map((device) => (
               <button
                 key={device}
+                type="button"
+                data-cy="simulation-device"
+                aria-pressed={selectedDevices.includes(device)}
                 className={`flex items-center space-x-2 p-2 border rounded-xl transition-all ${selectedDevices.includes(device) ? 'bg-blue-100 border-blue-500' : 'bg-white hover:bg-gray-100'}`}
                 onClick={() =>
                   setSelectedDevices((prev) =>
@@ -215,6 +218,7 @@ export const SimulatePower = () => {
 
         {result && (
           <div
+            data-cy="simulation-result"
             className={`p-4 rounded-xl mt-6 flex flex-col md:flex-row justify-center items-center gap-8 ${
               getTotalUsedPowerWithToplotna() > result.agreedPower
                 ? 'bg-red-100 border border-red-300'
@@ -234,10 +238,10 @@ export const SimulatePower = () => {
                 <h3 className="text-lg font-semibold mb-4">Rezultat simulacije</h3>
                 <p>Blok: {result.currentBlock}</p>
                 <p>Tarifa: {tariff}</p>
-                <p>
+                <p data-cy="simulation-agreed-power">
                   Dogovorjena moč: {result.agreedPower} W ({result.agreedPower / 1000} kW)
                 </p>
-                <p>
+                <p data-cy="simulation-total-power">
                   Poraba: {getTotalUsedPowerWithToplotna()} W ({(getTotalUsedPowerWithToplotna() / 1000).toFixed(2)} kW)
                   {!!currentWorkingPower && currentWorkingPower > 0 && (
                     <span className="text-sm text-purple-600 ml-2">
@@ -249,6 +253,7 @@ export const SimulatePower = () => {
                 <p>
                   Status:{' '}
                   <span
+                    data-cy="simulation-status"
                     className={getTotalUsedPowerWithToplotna() > result.agreedPower ? 'text-red-600' : 'text-green-600'}
                   >
                     {getTotalUsedPowerWithToplotna() > result.agreedPower ? 'PREKORAČITEV' : 'V REDU'}
@@ -278,7 +283,7 @@ export const SimulatePower = () => {
                 )}
               </div>
             </div>
-            <div className="w-full md:w-1/2">
+            <div data-cy="simulation-chart" className="w-full md:w-1/2">
               <Chart
                 type="bar"
                 height={320}

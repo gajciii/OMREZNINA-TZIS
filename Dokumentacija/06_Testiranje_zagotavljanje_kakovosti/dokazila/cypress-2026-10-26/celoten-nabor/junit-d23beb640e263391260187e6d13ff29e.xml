@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Mocha Tests" time="4.701" tests="1" failures="0">
+  <testsuite name="Root Suite" timestamp="2026-10-26T10:37:47" tests="0" file="cypress/e2e/tp02-csv.cy.ts" time="0.000" failures="0">
+  </testsuite>
+  <testsuite name="TP-02: Uvoz dnevnih stanj iz datoteke CSV" timestamp="2026-10-26T10:37:47" tests="1" time="4.701" failures="0">
+    <testcase name="TP-02: Uvoz dnevnih stanj iz datoteke CSV uvozi točen CSV ter ohrani 12/1/11 kWh po osvežitvi" time="4.582" classname="uvozi točen CSV ter ohrani 12/1/11 kWh po osvežitvi">
+    </testcase>
+  </testsuite>
+</testsuites>

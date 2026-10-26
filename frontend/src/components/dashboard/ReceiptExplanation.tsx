@@ -76,8 +76,10 @@ const InvoiceTable: React.FC = () => {
       <br />
       <div className="mb-4 flex gap-4 items-center flex-wrap">
         <div>
-          <label className="block text-sm mb-1">Izberi leto:</label>
+          <label htmlFor="receipt-year" className="block text-sm mb-1">Izberi leto:</label>
           <select
+            id="receipt-year"
+            data-cy="receipt-year"
             value={selectedYear}
             onChange={(e) => setSelectedYear(e.target.value)}
             className="p-2 rounded-xl border"
@@ -91,8 +93,10 @@ const InvoiceTable: React.FC = () => {
 
         {selectedYear && (
           <div>
-            <label className="block text-sm mb-1">Izberi mesec:</label>
+            <label htmlFor="receipt-month" className="block text-sm mb-1">Izberi mesec:</label>
             <select
+              id="receipt-month"
+              data-cy="receipt-month"
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
               className="p-2 rounded-xl border"
@@ -120,7 +124,7 @@ const InvoiceTable: React.FC = () => {
 
       {invoice && (
         <div className="overflow-x-auto rounded-xl">
-          <table className="w-full text-sm">
+          <table data-cy="receipt-table" className="w-full text-sm">
             <thead className="bg-blue-200 text-blue-800 uppercase text-xs font-semibold">
               <tr>
                 <th className="px-6 py-5 text-left">Postavka</th>
@@ -130,16 +134,17 @@ const InvoiceTable: React.FC = () => {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {[
-                { label: "Skupni znesek brez DDV", value: invoice.totalAmount },
-                { label: "Strošek energije", value: invoice.energyCost },
-                { label: "Omrežnina", value: invoice.networkCost },
-                { label: "Prispevki in ostalo", value: invoice.surcharges },
-                { label: "Penali", value: invoice.penalties },
-                { label: "DDV", value: invoice.vat },
-                { label: "Opomba", value: invoice.note || "–" },
+                { field: "totalAmount", label: "Skupni znesek brez DDV", value: invoice.totalAmount },
+                { field: "energyCost", label: "Strošek energije", value: invoice.energyCost },
+                { field: "networkCost", label: "Omrežnina", value: invoice.networkCost },
+                { field: "surcharges", label: "Prispevki in ostalo", value: invoice.surcharges },
+                { field: "penalties", label: "Penali", value: invoice.penalties },
+                { field: "vat", label: "DDV", value: invoice.vat },
+                { field: "note", label: "Opomba", value: invoice.note || "–" },
               ].map((row) => (
                 <React.Fragment key={row.label}>
                   <tr
+                    data-cy={`receipt-${row.field}`}
                     className="hover:bg-gray-50 transition-colors cursor-pointer sm:cursor-default"
                     onClick={() => {
                       if (window.innerWidth < 640) {
@@ -156,7 +161,7 @@ const InvoiceTable: React.FC = () => {
                     }}
                   >
                     <td className="px-6 py-5 font-medium text-gray-800">{row.label}</td>
-                    <td className="px-6 py-5 font-mono text-gray-700">{fmt(row.value, row.label)}</td>
+                    <td data-cy="receipt-value" className="px-6 py-5 font-mono text-gray-700">{fmt(row.value, row.label)}</td>
                     <td className="px-6 py-5 text-right hidden sm:table-cell">
                       <button
                         onClick={(e) => {

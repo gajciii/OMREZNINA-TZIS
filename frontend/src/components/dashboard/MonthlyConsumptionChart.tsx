@@ -215,19 +215,19 @@ useEffect(() => {
             </div>`
             : '';
         return `
-          <div style="padding:8px;min-width:210px">
-            <b style="font-size:15px">${formatMonth(month)}</b><br/>
+          <div data-cy="monthly-tooltip" style="padding:8px;min-width:210px">
+            <b data-cy="monthly-tooltip-period" style="font-size:15px">${formatMonth(month)}</b><br/>
             <div style="margin:4px 0">
               <span style="color:${colors[0]};font-weight:bold">${names[0]}:</span>
-              <span style="float:right">${porabaDisplay} kWh</span>
+              <span data-cy="monthly-tooltip-consumption" style="float:right">${porabaDisplay} kWh</span>
             </div>
             <div style="margin:4px 0">
               <span style="color:${colors[1]};font-weight:bold">${names[1]}:</span>
-              <span style="float:right">${monthData.totalSolar.toFixed(2)} kWh</span>
+              <span data-cy="monthly-tooltip-exported" style="float:right">${monthData.totalSolar.toFixed(2)} kWh</span>
             </div>
             <div style="margin:4px 0">
               <span style="color:${colors[2]};font-weight:bold">${names[2]}:</span>
-              <span style="float:right">${monthData.totalPrejeta.toFixed(2)} kWh</span>
+              <span data-cy="monthly-tooltip-imported" style="float:right">${monthData.totalPrejeta.toFixed(2)} kWh</span>
             </div>
             <hr style="margin:6px 0"/>
             <div>
@@ -400,11 +400,11 @@ useEffect(() => {
     <div className="rounded-xl dark:shadow-dark-md shadow-md bg-white dark:bg-darkgray p-6 relative w-full">
       <div className="block sm:hidden">
         <div className="mb-6 flex items-center justify-between gap-4">
-          {years.length > 1 && (
+          {years.length > 0 && (
             <div className="flex gap-2 items-center">
-              <label htmlFor="leto">Izberi leto:</label>
+              <label htmlFor="consumption-year-mobile">Izberi leto:</label>
               <Select
-                id="leto"
+                id="consumption-year-mobile"
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(e.target.value)}
                 className="max-w-[150px]"
@@ -488,13 +488,14 @@ useEffect(() => {
           <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <h5 className="card-title">Prikaz mesečne porabe</h5>
 
-            {years.length > 1 && (
+            {years.length > 0 && (
               <div className="flex gap-2 items-center">
-                <label htmlFor="leto" className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                <label htmlFor="consumption-year" className="text-sm font-medium text-gray-700 dark:text-gray-200">
                   Izberi leto:
                 </label>
                 <Select
-                  id="leto"
+                  id="consumption-year"
+                  data-cy="consumption-year"
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(e.target.value)}
                   className="max-w-[150px] border-violet-500 focus:ring-violet-500 focus:border-violet-500 rounded-xl"
@@ -508,31 +509,35 @@ useEffect(() => {
               </div>
             )}
           </div>
-            <Chart
-              options={optionsBarChart}
-              series={[
-                {
-                  name: 'Poraba (kWh)',
-                  data: barSeriesPoraba,
-                },
-                {
-                  name: 'Oddana energija (kWh)',
-                  data: barSeriesSolar,
-                },
-                {
-                  name: 'Prejeta energija (kWh)',
-                  data: barSeriesPrejeta,
-                },
-              ]}
-              type="bar"
-              height="315px"
-              width="100%"
-            />
+            <div data-cy="monthly-consumption-chart">
+              <Chart
+                options={optionsBarChart}
+                series={[
+                  {
+                    name: 'Poraba (kWh)',
+                    data: barSeriesPoraba,
+                  },
+                  {
+                    name: 'Oddana energija (kWh)',
+                    data: barSeriesSolar,
+                  },
+                  {
+                    name: 'Prejeta energija (kWh)',
+                    data: barSeriesPrejeta,
+                  },
+                ]}
+                type="bar"
+                height="315px"
+                width="100%"
+              />
+            </div>
             {selectedMonth && currentMonthData && (
               <>
                 <div className="flex items-center justify-between mt-8 mb-4">
-                  <h2 className="text-lg font-bold">Poraba po dnevih za {formatMonth(selectedMonth)}</h2>
+                  <h2 data-cy="daily-consumption-period" className="text-lg font-bold">Poraba po dnevih za {formatMonth(selectedMonth)}</h2>
                   <Select
+                    aria-label="Izberi mesec dnevne porabe"
+                    data-cy="consumption-month"
                     value={selectedMonth}
                     onChange={(e) => setSelectedMonth(e.target.value)}
                     className="max-w-[200px]"
@@ -547,22 +552,24 @@ useEffect(() => {
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                   Modra linija prikazuje prejeta energijo iz omrežja, rumena pa oddano energijo iz sončne elektrarne.
                 </p>
-                <Chart
-                  options={optionsDailyChart}
-                  series={[
-                    {
-                      name: 'Prejeta energija (kWh)',
-                      data: currentMonthData.dni.map(([_, e]) => e.poraba),
-                    },
-                    {
-                      name: 'Oddana solarna (kWh)',
-                      data: currentMonthData.dni.map(([_, e]) => e.solar),
-                    },
-                  ]}
-                  type="line"
-                  height="300px"
-                  width="100%"
-                />
+                <div data-cy="daily-consumption-chart">
+                  <Chart
+                    options={optionsDailyChart}
+                    series={[
+                      {
+                        name: 'Prejeta energija (kWh)',
+                        data: currentMonthData.dni.map(([_, e]) => e.poraba),
+                      },
+                      {
+                        name: 'Oddana solarna (kWh)',
+                        data: currentMonthData.dni.map(([_, e]) => e.solar),
+                      },
+                    ]}
+                    type="line"
+                    height="300px"
+                    width="100%"
+                  />
+                </div>
                 {summaryText}
               </>
             )}

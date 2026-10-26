@@ -1,0 +1,12 @@
+{
+  "runId": "2026-10-26T10-39-22-035Z",
+  "browser": "electron 130.0.6723.137",
+  "cypress": "14.3.3",
+  "startedAt": "2026-10-26T10:39:23.270Z",
+  "endedAt": "2026-10-26T10:39:27.137Z",
+  "totalTests": 1,
+  "passed": 1,
+  "failed": 0,
+  "pending": 0,
+  "skipped": 0
+}
