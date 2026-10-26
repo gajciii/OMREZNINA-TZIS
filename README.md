@@ -73,7 +73,7 @@ npm --prefix frontend run build
 mvn -f backend/pom.xml test
 ```
 
-GitHub Actions preverja lokalni sistem in Cypress teste. Samodejni deploy na Render ter Netlify konfiguracija sta odstranjena. Morebitne že obstoječe spletne storitve v računih teh ponudnikov je treba izklopiti v njihovih nadzornih ploščah.
+GitHub Actions ob vsakem pushu ali pull requestu zažene skupni [cevovod »Build, analyze and test«](.github/workflows/ci.yml): najprej `Build and analyze`, po uspehu pa `Smoke, parser and Cypress`. Drugi job zgradi frontend, zažene lokalno aplikacijo, preveri storitve, izvede regresijske teste parserja ter vse Cypress teste in shrani dokazila. Samodejni deploy na Render ter Netlify konfiguracija sta odstranjena. Morebitne že obstoječe spletne storitve v računih teh ponudnikov je treba izklopiti v njihovih nadzornih ploščah.
 
 Če so vrata zasedena, ustavi prejšnji zagon. Stanje in dnevnike vsebnikov preveri z `docker compose ps` in `docker compose logs`.
 
