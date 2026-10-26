@@ -1,5 +1,7 @@
 # Avtomatizirano funkcionalno testiranje Omrežnina+
 
+[Poročilo o testiranju](Porocilo_testiranja.md) združuje dejanske rezultate, odpravljene napake in dokazila končne izvedbe na veji `main`.
+
 | Podatek | Vrednost |
 | --- | --- |
 | Izhodišče | [Pregledani testni primeri TP-01–TP-05](Testni_primeri.md) in [priprava P-01–P-05](SZPO_priprava_testiranja.md) |

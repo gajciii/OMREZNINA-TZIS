@@ -89,4 +89,6 @@ Za interaktivni pregled uporabi `npm --prefix frontend run test:e2e:open`, za po
 
 [Navodila za avtomatizirano testiranje](Dokumentacija/06_Testiranje_zagotavljanje_kakovosti/Avtomatizirano_testiranje.md) opisujejo namestitev, pripravo emulatorjev, povezavo vsakega koraka s skripto, JUnit poročila in dokazila GitHub Actions. Vsak primer pripravi svojega uporabnika, po izvedbi odstrani njegove testne podatke in ohrani namenski Auth račun.
 
+[Poročilo o testiranju](Dokumentacija/06_Testiranje_zagotavljanje_kakovosti/Porocilo_testiranja.md) vsebuje rezultate TP-01–TP-05, dodatnih testov, odkrite napake in popravke, omejitve pokritosti ter povezave do dokazil uspešnega skupnega CI zagona z dne 26. 10. 2026.
+
 [Dokumentacija projekta](https://omreznina.gitbook.io/omreznina+) · [GitHub](https://github.com/adam8kac/Omreznina)
