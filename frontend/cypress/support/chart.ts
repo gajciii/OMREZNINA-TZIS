@@ -1,15 +1,46 @@
-/** Hover the rendered bar, then read the same tooltip shown to a user. */
+declare global {
+  namespace Cypress {
+    interface Chainable {
+      hoverChartBar(pointIndex: number, seriesIndex?: number): Chainable<JQuery<HTMLElement>>;
+    }
+  }
+}
+
+// ApexCharts replaces SVG nodes and tooltips on asynchronous React updates. A
+// query is retried together with its downstream assertions, so each attempt
+// moves over the CURRENT rendered bar rather than waiting on a stale tooltip.
+Cypress.Commands.addQuery('hoverChartBar', function (pointIndex: number, seriesIndex = 0) {
+  return ($chart: JQuery<HTMLElement>) => {
+    const chart = $chart[0];
+    const series = chart?.querySelectorAll('.apexcharts-bar-series .apexcharts-series')[seriesIndex];
+    const bar = series?.querySelectorAll<SVGPathElement>('.apexcharts-bar-area')[pointIndex];
+    if (!bar?.isConnected) return Cypress.$<HTMLElement>();
+
+    const bounds = bar.getBoundingClientRect();
+    if (bounds.width <= 0 || bounds.height <= 0) return Cypress.$<HTMLElement>();
+    expect(Cypress.$(bar), 'rendered chart bar').to.be.visible;
+
+    const view = bar.ownerDocument.defaultView as Window & typeof globalThis;
+    const position = {
+      bubbles: true,
+      cancelable: true,
+      view,
+      clientX: bounds.left + bounds.width / 2,
+      clientY: bounds.top + bounds.height / 2,
+    };
+    // Hovering is idempotent: these events only exercise the chart's normal
+    // tooltip handlers. No chart state or tooltip contents are set by the test.
+    bar.dispatchEvent(new view.MouseEvent('mouseover', position));
+    bar.dispatchEvent(new view.MouseEvent('mousemove', position));
+
+    return Cypress.$<HTMLElement>(chart.querySelectorAll<HTMLElement>('.apexcharts-tooltip'));
+  };
+});
+
+/** Hover a real rendered bar and keep hovering if a later assertion retries. */
 export function hoverBar(chartSelector: string, pointIndex: number, seriesIndex = 0) {
   cy.get(chartSelector).should('be.visible').scrollIntoView();
-  cy.get(chartSelector)
-    .find('.apexcharts-bar-series .apexcharts-series')
-    .eq(seriesIndex)
-    .find('.apexcharts-bar-area')
-    .eq(pointIndex)
-    .should('be.visible')
-    .trigger('mouseover', { eventConstructor: 'MouseEvent', force: true })
-    .trigger('mousemove', 'center', { eventConstructor: 'MouseEvent', force: true });
-  return cy.get(`${chartSelector} .apexcharts-tooltip`).should('be.visible');
+  return cy.get(chartSelector).hoverChartBar(pointIndex, seriesIndex).should('be.visible');
 }
 
 /** The label's SVG anchor gives the actual data-point x coordinate after layout. */
@@ -40,12 +71,12 @@ export function assertMonthlyValues(
   period: string,
   expected: { consumption: number; imported: number; exported: number },
 ) {
-  hoverBar('[data-cy="monthly-consumption-chart"]', pointIndex).within(() => {
-    cy.get('[data-cy="monthly-tooltip-period"]').should('have.text', period);
+  hoverBar('[data-cy="monthly-consumption-chart"]', pointIndex).should(($tooltip) => {
+    expect($tooltip.find('[data-cy="monthly-tooltip-period"]')).to.have.text(period);
     Object.entries(expected).forEach(([series, value]) => {
-      cy.get(`[data-cy="monthly-tooltip-${series}"]`)
-        .should('be.visible')
-        .and('have.text', `${value.toFixed(2)} kWh`);
+      const $value = $tooltip.find(`[data-cy="monthly-tooltip-${series}"]`);
+      expect($value).to.be.visible;
+      expect($value).to.have.text(`${value.toFixed(2)} kWh`);
     });
   });
 }
