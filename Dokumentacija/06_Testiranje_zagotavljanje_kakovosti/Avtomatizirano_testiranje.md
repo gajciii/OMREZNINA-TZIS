@@ -203,6 +203,8 @@ Pomočnika `assertMonthlyValues` in `hoverLineDay` sta v [chart.ts](../../fronte
 
 Neuspešen Cypress test pomeni neuspešen korak cevovoda. Dokazila so pripeta izvedbi Actions kot **`cypress-evidence-<run_id>-<run_attempt>`** in se hranijo **14 dni**. Testi uporabljajo lokalne emulatorje in za te funkcionalne primere ne potrebujejo produkcijskih Firebase poverilnic ali Cypress Cloud računa. Obstoječi ločeni workflow za analizo kakovosti ostane samostojen.
 
+Oba cevovoda uporabljata določeno okolje `ubuntu-24.04`. Dejanja `checkout`, `setup-node`, `upload-artifact`, `setup-java` in `cache` so posodobljena na izdaje, ki se izvajajo z Node.js 24. Projektni ukazi še vedno uporabljajo Node.js 22. S tem odpravimo [opozorilo o opuščenem Node.js 20 za dejanja](https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/) in vpliv [prehoda oznake ubuntu-latest na Ubuntu 26.04](https://github.com/actions/runner-images/issues/14748).
+
 ## Evidenca dejanske izvedbe in pregled uporabnika
 
 Avtomatizirane skripte je pripravil in 26. 10. 2026 izvedel agent UI. Lokalna izvedba celotnega nabora je bila uspešna: **21/21 testov**, brez napak ali preskočenih testov. Ponovitev TP-01–TP-05 je uspela **5/5**, vsak primer pa tudi v samostojnem procesu. Uspešni so še gradnja frontenda, preverjanje namestitve Cypressa, smoke test in vseh **5 regresijskih testov parserja**.
@@ -218,6 +220,8 @@ Dokazila so shranjena v [mapi izvedbe](dokazila/cypress-2026-10-26/): [celoten n
 | TP-05 | 26. 10. 2026, agent UI | Delovna različica zgoraj / Electron 130 | Meje 400/4000/4400/400 W, statusi in graf 4/4,4 kW pravilni | Uspešno | [Samostojna izvedba](dokazila/cypress-2026-10-26/samostojni-tp05/summary.json) |
 
 Pri prvem preverjanju sta bili odpravljeni napaki testne infrastrukture: avtentikacijske zahteve ne uporabljajo Firestore skrbniške glave, TP-05 pa po vsaki simulaciji počaka tudi na prikaz tarife, da ponovno risanje grafa ne prekine preverjanja tooltippa. Končna dokazila zgoraj so iz uspešnih izvedb po popravkih. Človeški pregled skript je še odprt.
+
+Prva [izvedba v GitHub Actions](https://github.com/gajciii/OMREZNINA-TZIS/actions/runs/40309454717) je pokazala dodatno razliko Linux okolja: 20/21 testov je uspelo, TP-05 pa je izgubil vidnost namiga ob ponovnem risanju grafa. `hoverChartBar` zato pri vsakem ponovnem preverjanju poišče trenutni SVG stolpec, izračuna njegove dejanske koordinate in ponovi premik kazalca. Vidnost, naslov in natančna številčna vrednost ostanejo povezani v istem ponavljajočem preverjanju. Po tej spremembi je [ponovni lokalni zagon](dokazila/cypress-2026-10-26/ponovitev-grafi/summary.json) uspel 5/5; pripadajoči manifest v isti mapi določa popravljeno delovno različico nad commitom `6012c214133fe7d6f6e1e4aadf991391c169cee8`. Zadnja izvedba CI je dostopna med [zagoni na namenski veji](https://github.com/gajciii/OMREZNINA-TZIS/actions?query=branch%3Acodex%2Fcypress-functional-tests).
 
 Pri neskladju navedi številko koraka, dejanski rezultat, poročilo/posnetek ter povezavo do napake. Napaka priprave se evidentira kot blokiran primer; neuspeh funkcionalne trditve kot neuspešen primer. Cypressova tehnična oznaka v obeh primerih lahko pomeni neuspeh, zato je razlaga v evidenci pomembna. Če je `workingTreeDirty: true`, commit sam ne predstavlja vseh testiranih sprememb; priloži tudi uporabljeno delovno različico oziroma diff.
 

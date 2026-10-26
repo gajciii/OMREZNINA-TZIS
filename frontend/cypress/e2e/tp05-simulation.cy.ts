@@ -63,13 +63,15 @@ describe('TP-05: Simulacija uporabe naprav in zaznava prekoračitve', () => {
     assertSimulation(4400, 'PREKORAČITEV', ['Sušilni stroj', 'TV']);
 
     cy.log('Korak 4: dejansko prikazani vrednosti primerjalnega grafa');
-    hoverBar('[data-cy="simulation-chart"]', 0).within(() => {
-      cy.get('.apexcharts-tooltip-title').should('have.text', 'Dogovorjena moč');
-      cy.get('.apexcharts-tooltip-text-y-value').should('be.visible').and('have.text', '4 kW');
+    hoverBar('[data-cy="simulation-chart"]', 0).should(($tooltip) => {
+      expect($tooltip.find('.apexcharts-tooltip-title')).to.have.text('Dogovorjena moč');
+      expect($tooltip.find('.apexcharts-tooltip-text-y-value')).to.be.visible;
+      expect($tooltip.find('.apexcharts-tooltip-text-y-value')).to.have.text('4 kW');
     });
-    hoverBar('[data-cy="simulation-chart"]', 1).within(() => {
-      cy.get('.apexcharts-tooltip-title').should('have.text', 'Poraba');
-      cy.get('.apexcharts-tooltip-text-y-value').should('be.visible').and('have.text', '4.4 kW');
+    hoverBar('[data-cy="simulation-chart"]', 1).should(($tooltip) => {
+      expect($tooltip.find('.apexcharts-tooltip-title')).to.have.text('Poraba');
+      expect($tooltip.find('.apexcharts-tooltip-text-y-value')).to.be.visible;
+      expect($tooltip.find('.apexcharts-tooltip-text-y-value')).to.have.text('4.4 kW');
     });
 
     cy.log('Korak 5: po odstranitvi sušilnega stroja ostane TV in V REDU');
